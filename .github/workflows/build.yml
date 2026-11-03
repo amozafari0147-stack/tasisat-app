@@ -1,8 +1,9 @@
-name: Build Flutter APK
+name: Build APK
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,11 +12,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
           channel: 'stable'
-      - run: flutter pub get
-      - run: flutter build apk --release
-      - uses: actions/upload-artifact@v4
+      - name: Create Flutter Project & Inject Code
+        run: |
+          mkdir temp_app
+          cd temp_app
+          flutter create --org com.tasisat .
+          flutter pub add sqflite path flutter_localizations intl
+          cp ../lib/main.dart lib/main.dart
+          flutter build apk --release
+          mv build/app/outputs/flutter-apk/app-release.apk ../tasisat_app.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: tasisat-app-release
+          path: tasisat_app.apk

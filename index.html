@@ -232,7 +232,8 @@
                 if (currentUser.role === 'admin' || currentUser.status === 'approved') {
                     initDashboard();
                 } else {
-                    logout();
+                    localStorage.removeItem('parsammehr_current_user');
+                    currentUser = null;
                 }
             }
             setInterval(checkSessionStatus, 2000);
@@ -247,124 +248,4 @@
             setTimeout(hideNotification, 5000);
         }
 
-        function hideNotification() {
-            const banner = document.getElementById('notification-banner');
-            banner.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
-        }
-
-        function switchAuthTab(tab) {
-            const isPersonnel = tab === 'personnel';
-            document.getElementById('auth-personnel-box').classList.toggle('hidden', !isPersonnel);
-            document.getElementById('auth-admin-box').classList.toggle('hidden', isPersonnel);
-            document.getElementById('tab-personnel').className = isPersonnel ? 'flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800' : 'flex-1 py-2 font-medium text-center text-gray-500';
-            document.getElementById('tab-admin').className = !isPersonnel ? 'flex-1 py-2 font-bold text-center border-b-2 border-amber-500 text-amber-600' : 'flex-1 py-2 font-medium text-center text-gray-500';
-        }
-
-        function registerPersonnel() {
-            const name = document.getElementById('p-name').value.trim();
-            const position = document.getElementById('p-position').value.trim();
-            const mobile = document.getElementById('p-mobile').value.trim();
-
-            if (!name || !position || !mobile) {
-                alert('لطفاً تمام فیلدها را کامل وارد کنید.');
-                return;
-            }
-
-            let existing = users.find(u => u.mobile === mobile);
-            if (existing) {
-                alert('این شماره موبایل قبلاً ثبت شده است.');
-                return;
-            }
-
-            users.push({ name, position, mobile, status: 'pending', role: 'user' });
-            localStorage.setItem('parsammehr_users', JSON.stringify(users));
-            showNotification('ثبت‌نام پرسنل', `درخواست ${name} ثبت شد و در انتظار تایید مدیر است.`);
-            alert('درخواست ثبت‌نام ارسال شد. پس از تأیید مدیر می‌توانید وارد شوید.');
-            document.getElementById('p-name').value = '';
-            document.getElementById('p-position').value = '';
-            document.getElementById('p-mobile').value = '';
-        }
-
-        function loginPersonnel() {
-            const mobile = document.getElementById('p-login-mobile').value.trim();
-            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
-            const user = users.find(u => u.mobile === mobile);
-            
-            if (!user) {
-                alert('کاربری با این شماره موبایل یافت نشد. لطفاً ثبت‌نام کنید.');
-                return;
-            }
-            if (user.status !== 'approved') {
-                alert('حساب کاربری شما هنوز توسط مدیر تأیید نشده است.');
-                return;
-            }
-            
-            currentUser = user;
-            localStorage.setItem('parsammehr_current_user', JSON.stringify(currentUser));
-            showNotification('ورود موفق', `${user.name} به سامانه وارد شد.`);
-            initDashboard();
-        }
-
-        // ورود مدیر با رمز 0051 (ستاره‌دار و مخفی)
-        function loginAdmin() {
-            const pass = document.getElementById('admin-pass').value.trim();
-            if (pass === '0051') {
-                currentUser = { name: 'مدیر کل تأسیسات', position: 'مدیر کارخانه', role: 'admin', mobile: 'admin' };
-                localStorage.setItem('parsammehr_current_user', JSON.stringify(currentUser));
-                showNotification('ورود مدیر', 'مدیر کل وارد سامانه شد.');
-                initDashboard();
-            } else {
-                alert('رمز عبور مدیریت اشتباه است.');
-            }
-        }
-
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('parsammehr_current_user');
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('dashboard-section').classList.add('hidden');
-            document.getElementById('header-user-info').classList.add('hidden');
-            document.getElementById('admin-pass').value = '';
-        }
-
-        function checkSessionStatus() {
-            if (!currentUser) return;
-            if (currentUser.role === 'user') {
-                let freshUsers = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
-                let me = freshUsers.find(u => u.mobile === currentUser.mobile);
-                if (!me || me.status === 'forced_logout') {
-                    alert('مدیر شما را از سیستم خارج کرد.');
-                    logout();
-                }
-            }
-        }
-
-        function initDashboard() {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('dashboard-section').classList.remove('hidden');
-            document.getElementById('header-user-info').classList.remove('hidden');
-            document.getElementById('current-username').innerText = currentUser.name + ' (' + currentUser.position + ')';
-
-            if (currentUser.role === 'admin') {
-                document.getElementById('manager-panel').classList.remove('hidden');
-                renderAdminPanel();
-            } else {
-                document.getElementById('manager-panel').classList.add('hidden');
-            }
-            renderEquipment();
-            renderPMLogs();
-        }
-
-        function renderAdminPanel() {
-            renderPendingUsers();
-            renderActiveUsers();
-        }
-
-        function renderPendingUsers() {
-            const container = document.getElementById('pending-users-list');
-            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
-            const pending = users.filter(u => u.status === 'pending');
-            if (pending.length === 0) {
-                container.innerHTML = '<p class="text-xs text-gray-500 py-1">هیچ درخواست تأییدی وجود ندارد.</p>';
-                return;
-            }
+        function hideNotification() 

@@ -11,9 +11,9 @@
         body { font-family: 'Vazirmatn', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <!-- هدر شیک و صنعتی -->
+    <!-- هدر شیک و صنعتی (بدون تغییر ساختار و رنگ) -->
     <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-b border-slate-800 shadow-2xl py-4 px-6 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <div class="w-3 h-8 bg-amber-500 rounded-full shadow-lg shadow-amber-500/50"></div>
@@ -52,7 +52,7 @@
                     <label class="block text-xs text-slate-300 mb-1">شماره موبایل</label>
                     <input type="tel" id="staff-phone" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500" dir="ltr">
                 </div>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg shadow-amber-500/20">ورود به سیستم</button>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg shadow-amber-500/20">ورود / ثبت‌نام در سیستم</button>
             </form>
 
             <!-- فرم مدیر -->
@@ -67,17 +67,17 @@
 
         <!-- داشبورد اصلی (پس از ورود) -->
         <section id="dashboard-section" class="hidden space-y-6">
-            <!-- نوار اطلاع‌رسانی / نوتیفیکیشن -->
-            <div id="notification-banner" class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-center justify-between">
+            <!-- نوار نوتیفیکیشن -->
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <span class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping"></span>
-                    <p class="text-xs md:text-sm text-amber-200" id="latest-notification">سیستم آماده به کار است. هیچ هشدار فعالی وجود ندارد.</p>
+                    <p class="text-xs md:text-sm text-amber-200" id="latest-notification">سیستم آماده به کار است.</p>
                 </div>
                 <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-1 rounded">مرکز اعلان‌ها</span>
             </div>
 
             <!-- تب‌های داشبورد -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div id="dashboard-tabs" class="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <button onclick="switchDashboardTab('equipment')" class="bg-slate-800 hover:bg-slate-700/80 border border-slate-700 p-4 rounded-xl text-center transition">
                     <div class="text-amber-400 font-bold text-lg mb-1">⚙️</div>
                     <div class="text-sm font-bold">تعریف تجهیزات</div>
@@ -93,6 +93,10 @@
                 <button onclick="switchDashboardTab('scanner')" class="bg-slate-800 hover:bg-slate-700/80 border border-slate-700 p-4 rounded-xl text-center transition">
                     <div class="text-amber-400 font-bold text-lg mb-1">📷</div>
                     <div class="text-sm font-bold">اسکنر بارکد</div>
+                </button>
+                <button id="manager-tab-btn" onclick="switchDashboardTab('users')" class="hidden bg-slate-800 hover:bg-slate-700/80 border border-slate-700 p-4 rounded-xl text-center transition">
+                    <div class="text-amber-400 font-bold text-lg mb-1">👥</div>
+                    <div class="text-sm font-bold">مدیریت کاربران</div>
                 </button>
             </div>
 
@@ -128,9 +132,7 @@
                 <!-- ۲. لیست تجهیزات -->
                 <div id="panel-list" class="dashboard-panel space-y-4 hidden">
                     <h3 class="text-base font-bold text-amber-400 border-b border-slate-700 pb-2">لیست تجهیزات کارخانه</h3>
-                    <div id="equipment-list-container" class="space-y-2">
-                        <!-- لیست پویا -->
-                    </div>
+                    <div id="equipment-list-container" class="space-y-2"></div>
                 </div>
 
                 <!-- ۳. بخش PM و تعمیرات -->
@@ -159,14 +161,27 @@
                     </div>
                 </div>
 
+                <!-- ۵. مدیریت کاربران (مخصوص مدیر) -->
+                <div id="panel-users" class="dashboard-panel space-y-4 hidden">
+                    <h3 class="text-base font-bold text-amber-400 border-b border-slate-700 pb-2">مدیریت دسترسی پرسنل</h3>
+                    <div id="users-list-container" class="space-y-2"></div>
+                </div>
+
             </div>
         </section>
 
     </main>
 
+    <!-- فوتر با متن حقوقی دلخواه -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        تمامی حقوق این سامانه متعلق به کارخانه پارسا مهر آرین می‌باشد.
+    </footer>
+
     <script>
         let currentUser = null;
         let equipmentData = JSON.parse(localStorage.getItem('parsa_eq') || '[]');
+        let usersData = JSON.parse(localStorage.getItem('parsa_users') || '[]');
+        let html5QrCode = null;
 
         function switchTab(role) {
             if (role === 'staff') {
@@ -186,7 +201,25 @@
             e.preventDefault();
             const name = document.getElementById('staff-name').value;
             const role = document.getElementById('staff-role').value;
-            currentUser = { name, role, type: 'staff' };
+            const phone = document.getElementById('staff-phone').value;
+
+            let existing = usersData.find(u => u.phone === phone);
+            if (!existing) {
+                existing = { name, role, phone, status: 'pending' };
+                usersData.push(existing);
+                localStorage.setItem('parsa_users', JSON.stringify(usersData));
+            }
+
+            if (existing.status === 'blocked') {
+                alert('دسترسی شما توسط مدیریت مسدود شده است.');
+                return;
+            }
+            if (existing.status === 'pending') {
+                alert('ثبت‌نام شما انجام شد. لطفاً منتظر تأیید مدیریت بمانید.');
+                return;
+            }
+
+            currentUser = existing;
             enterDashboard();
         }
 
@@ -206,11 +239,22 @@
             document.getElementById('dashboard-section').classList.remove('hidden');
             document.getElementById('header-user-info').classList.remove('hidden');
             document.getElementById('current-user-badge').innerText = `${currentUser.name} (${currentUser.role})`;
+            
+            if (currentUser.type === 'manager') {
+                document.getElementById('manager-tab-btn').classList.remove('hidden');
+                updateUsersList();
+            } else {
+                document.getElementById('manager-tab-btn').classList.add('hidden');
+            }
+
             updateEquipmentList();
             updateEquipmentSelect();
         }
 
         function logout() {
+            if (html5QrCode) {
+                html5QrCode.stop().catch(err => {});
+            }
             currentUser = null;
             document.getElementById('auth-section').classList.remove('hidden');
             document.getElementById('dashboard-section').classList.add('hidden');
@@ -219,6 +263,9 @@
         }
 
         function switchDashboardTab(tabName) {
+            if (html5QrCode && tabName !== 'scanner') {
+                html5QrCode.stop().catch(err => {});
+            }
             document.querySelectorAll('.dashboard-panel').forEach(p => p.classList.add('hidden'));
             document.getElementById(`panel-${tabName}`).classList.remove('hidden');
         }
@@ -269,22 +316,55 @@
             const notificationText = `فعالیت نت روی دستگاه «${eqName}» توسط ${currentUser.name} (${currentUser.role}) در تاریخ ${now} ثبت شد.`;
             document.getElementById('latest-notification').innerText = notificationText;
 
-            alert('گزارش PM با موفقیت ثبت شد و نوتیفیکیشن برای مدیر و پرسنل ارسال گردید.');
+            alert('گزارش PM با موفقیت ثبت شد و نوتیفیکیشن ارسال گردید.');
             e.target.reset();
         }
 
+        function updateUsersList() {
+            const container = document.getElementById('users-list-container');
+            if (usersData.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">هنوز کاربری ثبت‌نام نکرده است.</p>';
+                return;
+            }
+            container.innerHTML = usersData.map((u, index) => `
+                <div class="bg-slate-900 border border-slate-700 p-3 rounded-xl flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-bold text-amber-300">${u.name} (${u.role})</span>
+                        <span class="text-slate-400 block mt-1">تلفن: ${u.phone} | وضعیت: <span class="${u.status === 'approved' ? 'text-emerald-400' : 'text-amber-400'}">${u.status === 'approved' ? 'تأییدشده' : 'در انتظار تأیید'}</span></span>
+                    </div>
+                    <div class="flex gap-2">
+                        ${u.status !== 'approved' ? `<button onclick="changeUserStatus(${index}, 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded">تأیید دسترسی</button>` : `<button onclick="changeUserStatus(${index}, 'blocked')" class="bg-rose-700 hover:bg-rose-600 text-white px-3 py-1 rounded">قطع دسترسی (اخراج)</button>`}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function changeUserStatus(index, status) {
+            usersData[index].status = status;
+            localStorage.setItem('parsa_users', JSON.stringify(usersData));
+            updateUsersList();
+            alert('وضعیت کاربر به‌روزرسانی شد.');
+        }
+
         function startScanner() {
-            const scanner = new Html5Qrcode("reader");
-            scanner.start(
+            const resultContainer = document.getElementById('scan-result');
+            resultContainer.innerText = "در حال راه‌اندازی دوربین...";
+            
+            if (html5QrCode) {
+                html5QrCode.stop().catch(err => {});
+            }
+
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText) => {
-                    document.getElementById('scan-result').innerText = `نتیجه اسکن: ${decodedText}`;
-                    scanner.stop();
+                    resultContainer.innerText = `نتیجه اسکن: ${decodedText}`;
+                    html5QrCode.stop().catch(err => {});
                 },
-                (error) => {}
+                (errorMessage) => {}
             ).catch(err => {
-                alert('خطا در دسترسی به دوربین یا اسکنر');
+                resultContainer.innerText = "خطا در دسترسی به دوربین مرورگر.";
             });
         }
     </script>

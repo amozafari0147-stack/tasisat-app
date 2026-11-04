@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM PARSA MEHR</title>
+    <title>PM PARSA MEHR - سامانه مدیریت تأسیسات</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -31,12 +31,30 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { font-family: 'Vazirmatn', sans-serif; }
+        /* استایل نوتیفیکیشن متحرک بالا */
+        #notification-banner {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-industrial-100 text-industrial-900 min-h-screen flex flex-col">
 
-    <!-- هدر صنعتی با عنوان پارسا مهر آرین -->
-    <header class="bg-industrial-900 text-white shadow-md border-b-4 border-amber-500 sticky top-0 z-50">
+    <!-- کانتینر نوتیفیکیشن بالای صفحه -->
+    <div id="notification-banner" class="fixed top-0 left-0 right-0 z-50 transform -translate-y-full opacity-0 pointer-events-none p-4">
+        <div id="notification-box" class="max-w-md mx-auto bg-industrial-900 text-white px-4 py-3 rounded-xl shadow-2xl border-l-4 border-amber-500 flex items-center justify-between">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <i class="fa-solid fa-bell text-amber-400 text-xl animate-bounce"></i>
+                <div>
+                    <p id="notif-title" class="text-xs font-bold text-amber-400">اعلان جدید سامانه</p>
+                    <p id="notif-text" class="text-sm font-medium"></p>
+                </div>
+            </div>
+            <button onclick="hideNotification()" class="text-gray-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+    <!-- هدر صنعتی -->
+    <header class="bg-industrial-900 text-white shadow-md border-b-4 border-amber-500 sticky top-0 z-40">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3 space-x-reverse">
                 <div class="bg-amber-500 text-industrial-900 p-2 rounded-lg font-black text-xl shadow">
@@ -62,7 +80,7 @@
             <div class="max-w-md mx-auto">
                 <div class="flex border-b mb-6">
                     <button onclick="switchAuthTab('personnel')" id="tab-personnel" class="flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800">ورود / ثبت‌نام پرسنل</button>
-                    <button onclick="switchAuthTab('admin')" id="tab-admin" class="flex-1 py-2 font-medium text-center text-gray-500">ورود مدیریت</button>
+                    <button onclick="switchAuthTab('admin')" id="tab-admin" class="flex-1 py-2 font-medium text-center text-gray-500">ورود مدیریت (رمز: ۰۰۵۱)</button>
                 </div>
 
                 <!-- فرم پرسنل -->
@@ -75,7 +93,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">سمت سازمانی</label>
-                            <input type="text" id="p-position" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-industrial-800" placeholder="مثال: اپراتور / تکنسین تأسیسات">
+                            <input type="text" id="p-position" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-industrial-800" placeholder="مثال: تکنسین تأسیسات">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">شماره موبایل</label>
@@ -85,7 +103,7 @@
                     </div>
 
                     <div class="border-t pt-4 mt-4">
-                        <p class="text-xs text-gray-500 mb-2">قبلاً ثبت‌نام کرده‌اید و دسترسی شما تایید شده؟ ورود با موبایل:</p>
+                        <p class="text-xs text-gray-500 mb-2">قبلاً ثبت‌نام کرده‌اید و دسترسی شما تأیید شده؟ ورود با موبایل:</p>
                         <div class="flex space-x-2 space-x-reverse">
                             <input type="tel" id="p-login-mobile" class="flex-1 px-3 py-1.5 border rounded-lg text-sm" placeholder="شماره موبایل">
                             <button onclick="loginPersonnel()" class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-green-700">ورود</button>
@@ -93,12 +111,12 @@
                     </div>
                 </div>
 
-                <!-- فرم ورود مدیریت -->
+                <!-- فرم ورود مدیریت (رمز 0051) -->
                 <div id="auth-admin-box" class="space-y-4 hidden">
-                    <p class="text-xs text-gray-600 mb-3">مختص مدیر کارخانه جهت تأیید پرسنل و مدیریت سیستم:</p>
+                    <p class="text-xs text-gray-600 mb-3">مختص مدیر کارخانه جهت مدیریت پرسنل و تجهیزات:</p>
                     <div>
                         <label class="block text-sm font-medium mb-1">رمز عبور مدیریت</label>
-                        <input type="password" id="admin-pass" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="رمز عبور (پیش‌فرض: 1368)">
+                        <input type="password" id="admin-pass" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="رمز عبور (0051)">
                     </div>
                     <button onclick="loginAdmin()" class="w-full bg-amber-500 text-industrial-900 py-2 rounded-lg font-bold hover:bg-amber-400 transition">ورود به پنل مدیریت</button>
                 </div>
@@ -109,31 +127,62 @@
         <!-- داشبورد اصلی پس از ورود -->
         <section id="dashboard-section" class="hidden space-y-6">
             
-            <!-- پنل مدیریت (تأیید پرسنل) -->
-            <div id="manager-panel" class="hidden bg-white rounded-xl shadow-lg p-6 border border-amber-400 space-y-4">
+            <!-- پنل مدیریت (تأیید پرسنل و خروج اجباری کاربران) -->
+            <div id="manager-panel" class="hidden bg-white rounded-xl shadow-lg p-6 border border-amber-400 space-y-6">
                 <div class="flex items-center justify-between border-b pb-3">
-                    <h3 class="text-lg font-bold text-amber-600"><i class="fa-solid fa-user-shield ml-2"></i>مدیریت دسترسی پرسنل و تأیید ثبت‌نام‌ها</h3>
-                    <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">بخش مدیریت کل</span>
+                    <h3 class="text-lg font-bold text-amber-600"><i class="fa-solid fa-user-shield ml-2"></i>پنل مدیریت کل (کاربران و دسترسی‌ها)</h3>
+                    <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">مدیر سیستم</span>
                 </div>
-                <div id="pending-users-list" class="space-y-2">
-                    <!-- لیست پرسنل منتظر تایید -->
+
+                <!-- بخش تایید ثبت‌نام‌ها -->
+                <div>
+                    <h4 class="text-sm font-bold text-industrial-900 mb-2"><i class="fa-solid fa-user-clock text-blue-600 ml-1"></i>درخواست‌های ثبت‌نام جدید در انتظار تایید:</h4>
+                    <div id="pending-users-list" class="space-y-2"></div>
+                </div>
+
+                <!-- بخش مدیریت کاربران فعال و خروج اجباری -->
+                <div class="border-t pt-4">
+                    <h4 class="text-sm font-bold text-industrial-900 mb-2"><i class="fa-solid fa-users-gear text-green-600 ml-1"></i>کاربران فعال سامانه و خروج اجباری:</h4>
+                    <div id="active-users-list" class="space-y-2"></div>
                 </div>
             </div>
 
-            <!-- بخش اسکنر بارکد / QR Code -->
+            <!-- بخش اسکنر بارکد / QR Code و نمایش وضعیت دستگاه -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                 <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-qrcode text-amber-500 ml-2"></i>اسکن بارکد دستگاه با دوربین</h3>
                 <div id="reader" class="w-full max-w-md mx-auto mb-3"></div>
-                <button onclick="startScanner()" class="w-full bg-industrial-800 text-white py-2 rounded-lg font-bold hover:bg-industrial-700 transition">روشن کردن دوربین و اسکن</button>
+                <div class="flex space-x-2 space-x-reverse">
+                    <button onclick="startScanner()" class="flex-1 bg-industrial-800 text-white py-2 rounded-lg font-bold hover:bg-industrial-700 transition text-sm"><i class="fa-solid fa-camera ml-1"></i>روشن کردن دوربین و اسکن</button>
+                    <button onclick="stopScanner()" class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition text-sm">توقف دوربین</button>
+                </div>
+
+                <!-- کادر نمایش اطلاعات دستگاه اسکن شده -->
+                <div id="scanner-result-card" class="hidden mt-4 p-4 bg-industrial-50 border-2 border-amber-500 rounded-xl space-y-2">
+                    <h4 class="font-black text-industrial-900 text-base border-b pb-1 flex justify-between items-center">
+                        <span id="res-eq-name">نام دستگاه</span>
+                        <span id="res-eq-code" class="text-xs font-mono bg-amber-200 text-industrial-900 px-2 py-0.5 rounded">کد</span>
+                    </h4>
+                    <p class="text-xs text-gray-600">محل نصب: <span id="res-eq-location" class="font-medium text-gray-800"></span></p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 text-xs">
+                        <div class="bg-white p-2.5 rounded border shadow-sm">
+                            <p class="text-gray-500">آخرین بازدید و سرویس:</p>
+                            <p id="res-last-service" class="font-bold text-industrial-900 mt-1">هنوز سرویس نشده</p>
+                        </div>
+                        <div class="bg-white p-2.5 rounded border shadow-sm">
+                            <p class="text-gray-500">زمان باقی‌مانده تا سرویس بعدی:</p>
+                            <p id="res-remaining-time" class="font-bold text-green-600 mt-1">محاسبه نشده</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- بخش تعریف تجهیزات جدید (مخصوص مدیر / تکنسین مجاز) -->
+            <!-- بخش تعریف تجهیزات جدید -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-screwdriver-wrench text-blue-600 ml-2"></i>تعریف تجهیز جدید و اتصال بارکد</h3>
+                <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-screwdriver-wrench text-blue-600 ml-2"></i>تعریف تجهیز جدید و بارکد آن</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                     <input type="text" id="eq-name" placeholder="نام تجهیز (مثال: پمپ سانتریفیوژ)" class="px-3 py-2 border rounded-lg text-sm">
-                    <input type="text" id="eq-code" placeholder="کد بارکد / QR اختصاصی" class="px-3 py-2 border rounded-lg text-sm">
-                    <input type="text" id="eq-location" placeholder="محل نصب (مثال: سالن تولید)" class="px-3 py-2 border rounded-lg text-sm">
+                    <input type="text" id="eq-code" placeholder="کد بارکد (مثال: PUMP-01)" class="px-3 py-2 border rounded-lg text-sm">
+                    <input type="text" id="eq-location" placeholder="محل نصب (مثال: سالن پخت)" class="px-3 py-2 border rounded-lg text-sm">
                 </div>
                 <button onclick="addEquipment()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition text-sm">ثبت تجهیز در سامانه</button>
             </div>
@@ -143,24 +192,20 @@
                 <!-- لیست تجهیزات -->
                 <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                     <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-boxes-stacked text-green-600 ml-2"></i>لیست تجهیزات کارخانه</h3>
-                    <div id="equipment-list" class="space-y-3 max-h-60 overflow-y-auto">
-                        <!-- تجهیزات ثبت شده -->
-                    </div>
+                    <div id="equipment-list" class="space-y-3 max-h-60 overflow-y-auto"></div>
                 </div>
 
-                <!-- برنامه تعمیرات و نگهداری (PM) و هشدار هوشمند -->
+                <!-- ثبت سرویس PM -->
                 <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                    <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-clock-rotate-left text-amber-600 ml-2"></i>ثبت سرویس PM و سوابق کارکرد</h3>
+                    <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-clock-rotate-left text-amber-600 ml-2"></i>ثبت سرویس و تعمیرات (PM)</h3>
                     <div class="space-y-3">
                         <select id="pm-eq-select" class="w-full px-3 py-2 border rounded-lg text-sm">
                             <option value="">انتخاب تجهیز...</option>
                         </select>
-                        <input type="text" id="pm-desc" placeholder="شرح سرویس یا تعمیر انجام شده..." class="w-full px-3 py-2 border rounded-lg text-sm">
+                        <input type="text" id="pm-desc" placeholder="شرح سرویس انجام شده..." class="w-full px-3 py-2 border rounded-lg text-sm">
                         <button onclick="submitPMRecord()" class="w-full bg-amber-500 text-industrial-900 py-2 rounded-lg font-bold hover:bg-amber-400 transition text-sm">ثبت گزارش با تاریخ و ساعت دقیق</button>
                     </div>
-                    <div id="pm-logs" class="mt-4 space-y-2 max-h-40 overflow-y-auto text-xs text-gray-700">
-                        <!-- سوابق ثبت شده با نام کاربر و زمان -->
-                    </div>
+                    <div id="pm-logs" class="mt-4 space-y-2 max-h-40 overflow-y-auto text-xs text-gray-700"></div>
                 </div>
             </div>
 
@@ -177,10 +222,39 @@
     <script>
         let users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
         let equipments = JSON.parse(localStorage.getItem('parsammehr_equipments')) || [
-            { name: 'پمپ خط تولید', code: 'EQ-001', location: 'سالن پخت' }
+            { name: 'پمپ خط تولید شیرخشک', code: 'EQ-001', location: 'سالن پخت', lastService: null, intervalDays: 30 },
+            { name: 'خشک‌کن پاششی (Spray Dryer)', code: 'EQ-002', location: 'برج خشک‌کن', lastService: null, intervalDays: 15 }
         ];
         let pmLogs = JSON.parse(localStorage.getItem('parsammehr_pmlogs')) || [];
-        let currentUser = null;
+        let currentUser = JSON.parse(localStorage.getItem('parsammehr_current_user')) || null;
+        let html5QrCode = null;
+
+        // بررسی نشست کاربر به صورت لحظه‌ای
+        window.onload = function() {
+            if (currentUser) {
+                // اگر کاربر مدیر باشد یا حسابش تایید شده باشد
+                if (currentUser.role === 'admin' || currentUser.status === 'approved') {
+                    initDashboard();
+                } else {
+                    logout();
+                }
+            }
+            // بررسی دوره‌ای برای خروج اجباری توسط مدیر
+            setInterval(checkSessionStatus, 2000);
+        };
+
+        function showNotification(title, text) {
+            const banner = document.getElementById('notification-banner');
+            document.getElementById('notif-title').innerText = title;
+            document.getElementById('notif-text').innerText = text;
+            banner.classList.remove('-translate-y-full', 'opacity-0', 'pointer-events-none');
+            setTimeout(hideNotification, 5000);
+        }
+
+        function hideNotification() {
+            const banner = document.getElementById('notification-banner');
+            banner.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
+        }
 
         function switchAuthTab(tab) {
             const isPersonnel = tab === 'personnel';
@@ -196,7 +270,7 @@
             const mobile = document.getElementById('p-mobile').value.trim();
 
             if (!name || !position || !mobile) {
-                alert('لطفاً نام، سمت و شماره موبایل را کامل وارد کنید.');
+                alert('لطفاً تمام فیلدها را کامل وارد کنید.');
                 return;
             }
 
@@ -206,8 +280,9 @@
                 return;
             }
 
-            users.push({ name, position, mobile, status: 'pending', role: 'user' });
+            users.push({ name, position, mobile, status: 'pending', role: 'user', online: false });
             localStorage.setItem('parsammehr_users', JSON.stringify(users));
+            showNotification('ثبت‌نام پرسنل', `درخواست ${name} ثبت شد و در انتظار تایید مدیر است.`);
             alert('درخواست ثبت‌نام ارسال شد. پس از تأیید مدیر می‌توانید وارد شوید.');
             document.getElementById('p-name').value = '';
             document.getElementById('p-position').value = '';
@@ -218,24 +293,43 @@
             const mobile = document.getElementById('p-login-mobile').value.trim();
             const user = users.find(u => u.mobile === mobile);
             if (!user) {
-                alert('کاربری با این شماره موبایل یافت نشد. لطفاً ابتدا ثبت‌نام کنید.');
+                alert('کاربری با این شماره موبایل یافت نشد.');
                 return;
             }
             if (user.status !== 'approved') {
                 alert('حساب کاربری شما هنوز توسط مدیر تأیید نشده است.');
                 return;
             }
+            user.online = true;
             currentUser = user;
+            localStorage.setItem('parsammehr_users', JSON.stringify(users));
+            localStorage.setItem('parsammehr_current_user', JSON.stringify(currentUser));
+            showNotification('ورود موفق', `${user.name} به سامانه وارد شد.`);
             initDashboard();
         }
 
+        // ورود مدیر با رمز 0051 (مخفی)
         function loginAdmin() {
             const pass = document.getElementById('admin-pass').value.trim();
-            if (pass === '1368') {
-                currentUser = { name: 'مدیر کل تأسیسات', position: 'مدیر کارخانه', role: 'admin' };
+            if (pass === '0051') {
+                currentUser = { name: 'مدیر کل تأسیسات', position: 'مدیر کارخانه', role: 'admin', mobile: 'admin' };
+                localStorage.setItem('parsammehr_current_user', JSON.stringify(currentUser));
+                showNotification('ورود مدیر', 'مدیر کل وارد سامانه شد.');
                 initDashboard();
             } else {
-                alert('رمز عبور مدیریت اشتباه است. (پیش‌فرض: 1368)');
+                alert('رمز عبور مدیریت اشتباه است. (رمز صحیح: 0051)');
+            }
+        }
+
+        function checkSessionStatus() {
+            if (!currentUser) return;
+            if (currentUser.role === 'user') {
+                let freshUsers = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
+                let me = freshUsers.find(u => u.mobile === currentUser.mobile);
+                if (!me || me.status === 'forced_logout') {
+                    alert('مدیر شما را از سیستم خارج کرد.');
+                    logout();
+                }
             }
         }
 
@@ -247,26 +341,31 @@
 
             if (currentUser.role === 'admin') {
                 document.getElementById('manager-panel').classList.remove('hidden');
-                renderPendingUsers();
+                renderAdminPanel();
             }
             renderEquipment();
             renderPMLogs();
+        }
+
+        function renderAdminPanel() {
+            renderPendingUsers();
+            renderActiveUsers();
         }
 
         function renderPendingUsers() {
             const container = document.getElementById('pending-users-list');
             const pending = users.filter(u => u.status === 'pending');
             if (pending.length === 0) {
-                container.innerHTML = '<p class="text-sm text-gray-500 py-2">هیچ درخواست تأیید جدیدی وجود ندارد.</p>';
+                container.innerHTML = '<p class="text-xs text-gray-500 py-1">هیچ درخواست تأییدی وجود ندارد.</p>';
                 return;
             }
             container.innerHTML = pending.map((u) => `
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
+                <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border text-xs">
                     <div>
-                        <p class="font-bold text-sm text-industrial-900">${u.name} - <span class="text-xs text-gray-600 font-normal">${u.position}</span></p>
-                        <p class="text-xs text-gray-500">موبایل: ${u.mobile}</p>
+                        <p class="font-bold text-industrial-900">${u.name} - <span class="text-gray-600 font-normal">${u.position}</span></p>
+                        <p class="text-gray-500">موبایل: ${u.mobile}</p>
                     </div>
-                    <button onclick="approveUser('${u.mobile}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">تایید دسترسی</button>
+                    <button onclick="approveUser('${u.mobile}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded font-bold transition">تایید دسترسی</button>
                 </div>
             `).join('');
         }
@@ -276,8 +375,38 @@
             if (user) {
                 user.status = 'approved';
                 localStorage.setItem('parsammehr_users', JSON.stringify(users));
-                renderPendingUsers();
+                renderAdminPanel();
+                showNotification('مدیریت کاربران', `دسترسی ${user.name} تایید شد.`);
                 alert('دسترسی کاربر تأیید شد.');
+            }
+        }
+
+        function renderActiveUsers() {
+            const container = document.getElementById('active-users-list');
+            const approved = users.filter(u => u.status === 'approved');
+            if (approved.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-500 py-1">هیچ کاربر فعالی ثبت نشده است.</p>';
+                return;
+            }
+            container.innerHTML = approved.map((u) => `
+                <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border text-xs">
+                    <div>
+                        <p class="font-bold text-industrial-900">${u.name} (${u.position})</p>
+                        <p class="text-gray-500">موبایل: ${u.mobile}</p>
+                    </div>
+                    <button onclick="forceLogoutUser('${u.mobile}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded font-bold transition">خروج اجباری از سیستم</button>
+                </div>
+            `).join('');
+        }
+
+        function forceLogoutUser(mobile) {
+            const user = users.find(u => u.mobile === mobile);
+            if (user) {
+                user.status = 'forced_logout';
+                localStorage.setItem('parsammehr_users', JSON.stringify(users));
+                renderAdminPanel();
+                showNotification('خروج اجباری', `کاربر ${user.name} توسط مدیر از سیستم خارج شد.`);
+                alert(`کاربر ${user.name} از سامانه اخراج شد.`);
             }
         }
 
@@ -291,12 +420,13 @@
                 return;
             }
 
-            equipments.push({ name, code, location });
+            equipments.push({ name, code, location: location || 'نامشخص', lastService: null, intervalDays: 30 });
             localStorage.setItem('parsammehr_equipments', JSON.stringify(equipments));
             document.getElementById('eq-name').value = '';
             document.getElementById('eq-code').value = '';
             document.getElementById('eq-location').value = '';
             renderEquipment();
+            showNotification('تجهیزات', `تجهیز جدید (${name}) با کد ${code} ثبت شد.`);
             alert('تجهیز جدید با موفقیت ثبت شد.');
         }
 
@@ -307,78 +437,115 @@
             listContainer.innerHTML = equipments.map(eq => `
                 <div class="bg-gray-50 p-3 rounded border text-xs">
                     <p class="font-bold text-industrial-900 text-sm">${eq.name}</p>
-                    <p class="text-gray-600">بارکد: <span class="font-mono text-amber-600">${eq.code}</span> | محل: ${eq.location || 'نامشخص'}</p>
+                    <p class="text-gray-600">بارکد: <span class="font-mono text-amber-600 font-bold">${eq.code}</span> | محل: ${eq.location}</p>
+                    <p class="text-gray-500 mt-1">دوره سرویس: ${eq.intervalDays} روزه</p>
                 </div>
             `).join('');
 
             selectContainer.innerHTML = '<option value="">انتخاب تجهیز...</option>' + equipments.map(eq => `
-                <option value="${eq.name} (${eq.code})">${eq.name} - [${eq.code}]</option>
+                <option value="${eq.code}">${eq.name} - [${eq.code}]</option>
             `).join('');
         }
 
+        // اسکن بارکد و نمایش تایم آخرین بازدید و زمان باقی‌مانده تا سرویس
+        function startScanner() {
+            if (html5QrCode) {
+                stopScanner();
+            }
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    handleScannedCode(decodedText);
+                    stopScanner();
+                },
+                (errorMessage) => {}
+            ).catch(err => {
+                alert('خطا در دسترسی به دوربین گوشی. لطفاً دسترسی دوربین را فعال کنید.');
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode = null;
+                }).catch(err => {
+                    html5QrCode = null;
+                });
+            }
+        }
+
+        function handleScannedCode(code) {
+            code = code.trim();
+            const eq = equipments.find(e => e.code === code);
+            const resultCard = document.getElementById('scanner-result-card');
+            
+            if (!eq) {
+                alert('بارکد اسکن شد اما در سامانه تعریف نشده است: ' + code);
+                document.getElementById('eq-code').value = code;
+                return;
+            }
+
+            resultCard.classList.remove('hidden');
+            document.getElementById('res-eq-name').innerText = eq.name;
+            document.getElementById('res-eq-code').innerText = eq.code;
+            document.getElementById('res-eq-location').innerText = eq.location;
+
+            if (!eq.lastService) {
+                document.getElementById('res-last-service').innerText = 'هنوز سرویسی ثبت نشده است';
+                document.getElementById('res-remaining-time').innerText = 'نیاز به سرویس اولیه';
+                document.getElementById('res-remaining-time').className = 'font-bold text-red-600 mt-1';
+            } else {
+                document.getElementById('res-last-service').innerText = eq.lastService;
+                
+                // محاسبه زمان باقی‌مانده
+                let lastDate = new Date(eq.lastServiceTimestamp);
+                let nextServiceDate = new Date(lastDate.getTime() + (eq.intervalDays * 24 * 60 * 60 * 1000));
+                let now = new Date();
+                let diffTime = nextServiceDate - now;
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let remText = document.getElementById('res-remaining-time');
+                if (diffDays > 0) {
+                    remText.innerText = `${diffDays} روز باقی‌مانده تا سرویس بعدی`;
+                    remText.className = 'font-bold text-green-600 mt-1';
+                } else {
+                    remText.innerText = `سررسید سرویس گذشته است! (${Math.abs(diffDays)} روز تأخیر)`;
+                    remText.className = 'font-bold text-red-600 mt-1 animate-pulse';
+                }
+            }
+
+            showNotification('اسکن بارکد موفق', `دستگاه ${eq.name} اسکن شد.`);
+        }
+
         function submitPMRecord() {
-            const eq = document.getElementById('pm-eq-select').value;
+            const eqCode = document.getElementById('pm-eq-select').value;
             const desc = document.getElementById('pm-desc').value.trim();
 
-            if (!eq || !desc) {
+            if (!eqCode || !desc) {
                 alert('لطفاً تجهیز را انتخاب کرده و شرح سرویس را وارد کنید.');
                 return;
             }
 
+            let eq = equipments.find(e => e.code === eqCode);
             const now = new Date();
             const dateStr = now.toLocaleDateString('fa-IR');
             const timeStr = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+            const datetimeFull = `${dateStr} ساعت ${timeStr}`;
+
+            eq.lastService = datetimeFull;
+            eq.lastServiceTimestamp = now.getTime();
+            localStorage.setItem('parsammehr_equipments', JSON.stringify(equipments));
 
             const record = {
-                eq,
+                eq: `${eq.name} [${eq.code}]`,
                 desc,
                 user: currentUser.name,
                 position: currentUser.position,
-                datetime: `${dateStr} ساعت ${timeStr}`
+                datetime: datetimeFull
             };
 
             pmLogs.unshift(record);
             localStorage.setItem('parsammehr_pmlogs', JSON.stringify(pmLogs));
-            document.getElementById('pm-desc').value = '';
-            renderPMLogs();
-            alert('گزارش نت با موفقیت ثبت شد.');
-        }
-
-        function renderPMLogs() {
-            const container = document.getElementById('pm-logs');
-            if (pmLogs.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">هنوز گزارشی ثبت نشده است.</p>';
-                return;
-            }
-            container.innerHTML = pmLogs.map(log => `
-                <div class="bg-amber-50 p-2.5 rounded border border-amber-200">
-                    <p class="font-bold text-industrial-900">${log.eq}</p>
-                    <p class="text-gray-700">${log.desc}</p>
-                    <p class="text-[10px] text-gray-500 mt-1">ثبت توسط: ${log.user} (${log.position}) در ${log.datetime}</p>
-                </div>
-            `).join('');
-        }
-
-        function startScanner() {
-            const scanner = new Html5Qrcode("reader");
-            scanner.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
-                (decodedText) => {
-                    alert('بارکد اسکن شد: ' + decodedText);
-                    document.getElementById('eq-code').value = decodedText;
-                    scanner.stop();
-                },
-                (errorMessage) => {}
-            ).catch(err => {
-                alert('خطا در دسترسی به دوربین گوشی.');
-            });
-        }
-
-        function logout() {
-            currentUser = null;
-            location.reload();
-        }
-    </script>
-</body>
-</html>
+            document.getE

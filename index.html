@@ -110,12 +110,12 @@
                     </div>
                 </div>
 
-                <!-- فرم ورود مدیریت (رمز 0051) -->
+                <!-- فرم ورود مدیریت (رمز 0051 ستاره‌دار) -->
                 <div id="auth-admin-box" class="space-y-4 hidden">
                     <p class="text-xs text-gray-600 mb-3">مختص مدیر کارخانه جهت مدیریت پرسنل و تجهیزات:</p>
                     <div>
                         <label class="block text-sm font-medium mb-1">رمز عبور مدیریت</label>
-                        <input type="password" id="admin-pass" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="رمز عبور (0051)">
+                        <input type="password" id="admin-pass" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-center tracking-widest text-lg" placeholder="••••">
                     </div>
                     <button onclick="loginAdmin()" class="w-full bg-amber-500 text-industrial-900 py-2 rounded-lg font-bold hover:bg-amber-400 transition">ورود به پنل مدیریت</button>
                 </div>
@@ -212,7 +212,7 @@
 
     <!-- فوتر -->
     <footer class="bg-industrial-900 text-gray-400 text-center py-4 text-xs mt-auto">
-        <p>کلیه حقوق برای شرکت پارسا مهر آرین محفوظ است © ۱۴۰۵</p>
+        <p>تمامی حقوق این سامانه متعلق به کارخانه پارسا مهر آرین می‌باشد.</p>
     </footer>
 
     <!-- کدهای منطق جاوااسکریپت -->
@@ -226,7 +226,7 @@
         let currentUser = JSON.parse(localStorage.getItem('parsammehr_current_user')) || null;
         let html5QrCode = null;
 
-        // بررسی نشست کاربر به هنگام لود صفحه (جلوگیری از پرش به صفحه اول)
+        // بررسی نشست کاربر بهنگام لود صفحه (جلوگیری از خروج با رفرش)
         window.onload = function() {
             if (currentUser) {
                 if (currentUser.role === 'admin' || currentUser.status === 'approved') {
@@ -236,6 +236,7 @@
                 }
             }
             setInterval(checkSessionStatus, 2000);
+            renderPMLogs();
         };
 
         function showNotification(title, text) {
@@ -304,7 +305,7 @@
             initDashboard();
         }
 
-        // ورود مدیر با رمز 0051 (کاملاً مخفی)
+        // ورود مدیر با رمز 0051 (ستاره‌دار و مخفی)
         function loginAdmin() {
             const pass = document.getElementById('admin-pass').value.trim();
             if (pass === '0051') {
@@ -313,8 +314,17 @@
                 showNotification('ورود مدیر', 'مدیر کل وارد سامانه شد.');
                 initDashboard();
             } else {
-                alert('رمز عبور مدیریت اشتباه است. (رمز صحیح: 0051)');
+                alert('رمز عبور مدیریت اشتباه است.');
             }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('parsammehr_current_user');
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('dashboard-section').classList.add('hidden');
+            document.getElementById('header-user-info').classList.add('hidden');
+            document.getElementById('admin-pass').value = '';
         }
 
         function checkSessionStatus() {
@@ -338,6 +348,8 @@
             if (currentUser.role === 'admin') {
                 document.getElementById('manager-panel').classList.remove('hidden');
                 renderAdminPanel();
+            } else {
+                document.getElementById('manager-panel').classList.add('hidden');
             }
             renderEquipment();
             renderPMLogs();
@@ -356,192 +368,3 @@
                 container.innerHTML = '<p class="text-xs text-gray-500 py-1">هیچ درخواست تأییدی وجود ندارد.</p>';
                 return;
             }
-            container.innerHTML = pending.map((u) => `
-                <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border text-xs">
-                    <div>
-                        <p class="font-bold text-industrial-900">${u.name} - <span class="text-gray-600 font-normal">${u.position}</span></p>
-                        <p class="text-gray-500">موبایل: ${u.mobile}</p>
-                    </div>
-                    <button onclick="approveUser('${u.mobile}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded font-bold transition">تایید دسترسی</button>
-                </div>
-            `).join('');
-        }
-
-        function approveUser(mobile) {
-            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
-            const user = users.find(u => u.mobile === mobile);
-            if (user) {
-                user.status = 'approved';
-                localStorage.setItem('parsammehr_users', JSON.stringify(users));
-                renderAdminPanel();
-                showNotification('مدیریت کاربران', `دسترسی ${user.name} تایید شد.`);
-                alert('دسترسی کاربر تأیید شد.');
-            }
-        }
-
-        function renderActiveUsers() {
-            const container = document.getElementById('active-users-list');
-            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
-            const approved = users.filter(u => u.status === 'approved');
-            if (approved.length === 0) {
-                container.innerHTML = '<p class="text-xs text-gray-500 py-1">هیچ کاربر فعالی ثبت نشده است.</p>';
-                return;
-            }
-            container.innerHTML = approved.map((u) => `
-                <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border text-xs">
-                    <div>
-                        <p class="font-bold text-industrial-900">${u.name} (${u.position})</p>
-                        <p class="text-gray-500">موبایل: ${u.mobile}</p>
-                    </div>
-                    <button onclick="forceLogoutUser('${u.mobile}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded font-bold transition">خروج اجباری از سیستم</button>
-                </div>
-            `).join('');
-        }
-
-        function forceLogoutUser(mobile) {
-            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
-            const user = users.find(u => u.mobile === mobile);
-            if (user) {
-                user.status = 'forced_logout';
-                localStorage.setItem('parsammehr_users', JSON.stringify(users));
-                renderAdminPanel();
-                showNotification('خروج اجباری', `کاربر ${user.name} توسط مدیر از سیستم خارج شد.`);
-                alert(`کاربر ${user.name} از سامانه اخراج شد.`);
-            }
-        }
-
-        function addEquipment() {
-            const name = document.getElementById('eq-name').value.trim();
-            const code = document.getElementById('eq-code').value.trim();
-            const location = document.getElementById('eq-location').value.trim();
-
-            if (!name || !code) {
-                alert('نام و کد بارکد تجهیز الزامی است.');
-                return;
-            }
-
-            equipments.push({ name, code, location: location || 'نامشخص', lastService: null, intervalDays: 30 });
-            localStorage.setItem('parsammehr_equipments', JSON.stringify(equipments));
-            document.getElementById('eq-name').value = '';
-            document.getElementById('eq-code').value = '';
-            document.getElementById('eq-location').value = '';
-            renderEquipment();
-            showNotification('تجهیزات', `تجهیز جدید (${name}) با کد ${code} ثبت شد.`);
-            alert('تجهیز جدید با موفقیت ثبت شد.');
-        }
-
-        function renderEquipment() {
-            const listContainer = document.getElementById('equipment-list');
-            const selectContainer = document.getElementById('pm-eq-select');
-            
-            listContainer.innerHTML = equipments.map(eq => `
-                <div class="bg-gray-50 p-3 rounded border text-xs">
-                    <p class="font-bold text-industrial-900 text-sm">${eq.name}</p>
-                    <p class="text-gray-600">بارکد: <span class="font-mono text-amber-600 font-bold">${eq.code}</span> | محل: ${eq.location}</p>
-                    <p class="text-gray-500 mt-1">دوره سرویس: ${eq.intervalDays} روزه</p>
-                </div>
-            `).join('');
-
-            selectContainer.innerHTML = '<option value="">انتخاب تجهیز...</option>' + equipments.map(eq => `
-                <option value="${eq.code}">${eq.name} - [${eq.code}]</option>
-            `).join('');
-        }
-
-        function startScanner() {
-            if (html5QrCode) {
-                stopScanner();
-            }
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
-                (decodedText) => {
-                    handleScannedCode(decodedText);
-                    stopScanner();
-                },
-                (errorMessage) => {}
-            ).catch(err => {
-                alert('خطا در دسترسی به دوربین گوشی. لطفاً دسترسی دوربین را فعال کنید.');
-            });
-        }
-
-        function stopScanner() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    html5QrCode = null;
-                }).catch(err => {
-                    html5QrCode = null;
-                });
-            }
-        }
-
-        function handleScannedCode(code) {
-            code = code.trim();
-            const eq = equipments.find(e => e.code === code);
-            const resultCard = document.getElementById('scanner-result-card');
-            
-            if (!eq) {
-                alert('بارکد اسکن شد اما در سامانه تعریف نشده است: ' + code);
-                document.getElementById('eq-code').value = code;
-                return;
-            }
-
-            resultCard.classList.remove('hidden');
-            document.getElementById('res-eq-name').innerText = eq.name;
-            document.getElementById('res-eq-code').innerText = eq.code;
-            document.getElementById('res-eq-location').innerText = eq.location;
-
-            if (!eq.lastService) {
-                document.getElementById('res-last-service').innerText = 'هنوز سرویسی ثبت نشده است';
-                document.getElementById('res-remaining-time').innerText = 'نیاز به سرویس اولیه';
-                document.getElementById('res-remaining-time').className = 'font-bold text-red-600 mt-1';
-            } else {
-                document.getElementById('res-last-service').innerText = eq.lastService;
-                
-                let lastDate = new Date(eq.lastServiceTimestamp);
-                let nextServiceDate = new Date(lastDate.getTime() + (eq.intervalDays * 24 * 60 * 60 * 1000));
-                let now = new Date();
-                let diffTime = nextServiceDate - now;
-                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                let remText = document.getElementById('res-remaining-time');
-                if (diffDays > 0) {
-                    remText.innerText = `${diffDays} روز باقی‌مانده تا سرویس بعدی`;
-                    remText.className = 'font-bold text-green-600 mt-1';
-                } else {
-                    remText.innerText = `سررسید سرویس گذشته است! (${Math.abs(diffDays)} روز تأخیر)`;
-                    remText.className = 'font-bold text-red-600 mt-1 animate-pulse';
-                }
-            }
-
-            showNotification('اسکن بارکد موفق', `دستگاه ${eq.name} اسکن شد.`);
-        }
-
-        function submitPMRecord() {
-            const eqCode = document.getElementById('pm-eq-select').value;
-            const desc = document.getElementById('pm-desc').value.trim();
-
-            if (!eqCode || !desc) {
-                alert('لطفاً تجهیز را انتخاب کرده و شرح سرویس را وارد کنید.');
-                return;
-            }
-
-            let eq = equipments.find(e => e.code === eqCode);
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('fa-IR');
-            const timeStr = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-            const datetimeFull = `${dateStr} ساعت ${timeStr}`;
-
-            eq.lastService = datetimeFull;
-            eq.lastServiceTimestamp = now.getTime();
-            localStorage.setItem('parsammehr_equipments', JSON.stringify(equipments));
-
-            const record = {
-                eq: `${eq.name} [${eq.code}]`,
-                desc,
-                user: currentUser.name,
-                position: currentUser.position,
-                datetime: datetimeFull
-            };
-
-            pmLogs.unshift(record);

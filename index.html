@@ -1,120 +1,248 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مدیریت تأسیسات و نگهداری (PM)</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background-color: #f4f6f9; }
-    .card-header { background: #1b3a57; color: white; }
-    .badge-high { background-color: #dc3545; }
-    .badge-mid { background-color: #ffc107; color: black; }
-    .badge-low { background-color: #198754; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه جامع مدیریت تأسیسات و نت (CMMS)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        body { font-family: 'Vazirmatn', sans-serif; }
+    </style>
 </head>
-<body class="p-3">
-  <div class="container" style="max-width: 600px;">
-    <div class="card shadow-sm mb-4">
-      <div class="card-header text-center py-3">
-        <h4 class="m-0"><i class="fa-solid fa-gears"></i> سیستم مدیریت نت و تأسیسات</h4>
-        <small class="text-white-50">پارسا مهر آرین (ثبت آفلاین در حافظه گوشی)</small>
-      </div>
-      <div class="card-body">
-        <form id="pmForm">
-          <div class="mb-3">
-            <label class="form-label font-weight-bold">کد / نام تجهیز:</label>
-            <input type="text" id="eqName" class="form-control" placeholder="مثال: دیگ بخار، پمپ تغذیه ۱" required>
-          </div>
-          <div class="row">
-            <div class="col-6 mb-3">
-              <label class="form-label">واحد / خط:</label>
-              <select id="eqSection" class="form-select">
-                <option value="بویلر و تأسیسات بخار">بویلر و بخار</option>
-                <option value="خط تولید شیرخشک">خط شیرخشک</option>
-                <option value="سیستم تصفیه و پایپینگ">پایپینگ و تصفیه</option>
-                <option value="برق و تابلوها">برق و تابلوها</option>
-              </select>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-50 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-lg font-bold text-emerald-400">⚙️ مدیریت تأسیسات و نت (CMMS)</h1>
+            <span id="sync-status" class="text-xs bg-emerald-900 text-emerald-300 px-2.5 py-1 rounded-full">سیستم فعال</span>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-slate-800/80 backdrop-blur border-b border-slate-700 sticky top-16 z-40">
+        <div class="container mx-auto flex overflow-x-auto p-2 gap-2">
+            <button onclick="switchTab('dashboard')" class="tab-btn px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium whitespace-nowrap transition">📊 داشبورد</button>
+            <button onclick="switchTab('scanner')" class="tab-btn px-4 py-2 rounded-lg bg-slate-700 text-slate-300 text-sm font-medium whitespace-nowrap transition">📷 اسکن QR / بارکد</button>
+            <button onclick="switchTab('assets')" class="tab-btn px-4 py-2 rounded-lg bg-slate-700 text-slate-300 text-sm font-medium whitespace-nowrap transition">🏭 تجهیزات کارخانه</button>
+            <button onclick="switchTab('pm')" class="tab-btn px-4 py-2 rounded-lg bg-slate-700 text-slate-300 text-sm font-medium whitespace-nowrap transition">🛠️ برنامه‌های PM</button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="container mx-auto p-4 max-w-4xl pb-24">
+        
+        <!-- DASHBOARD TAB -->
+        <section id="tab-dashboard" class="space-y-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
+                    <p class="text-xs text-slate-400">کل تجهیزات</p>
+                    <p id="stat-total" class="text-2xl font-bold text-white mt-1">0</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
+                    <p class="text-xs text-slate-400">در حال کار</p>
+                    <p id="stat-active" class="text-2xl font-bold text-emerald-400 mt-1">0</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
+                    <p class="text-xs text-slate-400">نیازمند تعمیر / سرویس</p>
+                    <p id="stat-warning" class="text-2xl font-bold text-amber-400 mt-1">0</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
+                    <p class="text-xs text-slate-400">اقدامات PM ماه جاری</p>
+                    <p id="stat-pm" class="text-2xl font-bold text-sky-400 mt-1">0</p>
+                </div>
             </div>
-            <div class="col-6 mb-3">
-              <label class="form-label">اولویت اقدام:</label>
-              <select id="priority" class="form-select">
-                <option value="فوری / اضطراری" class="text-danger">فوری / اضطراری</option>
-                <option value="سرویس دوره‌ای (PM)" selected>سرویس دوره‌ای (PM)</option>
-                <option value="عادی">عادی</option>
-              </select>
+
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                <h3 class="font-bold text-white mb-3">⚡ دسترسی سریع</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="switchTab('scanner')" class="p-3 bg-emerald-600/20 border border-emerald-500/30 rounded-lg text-emerald-300 text-sm font-medium flex items-center justify-center gap-2">📷 اسکن بارکد دستگاه</button>
+                    <button onclick="openNewAssetModal()" class="p-3 bg-sky-600/20 border border-sky-500/30 rounded-lg text-sky-300 text-sm font-medium flex items-center justify-center gap-2">➕ تعریف دستگاه جدید</button>
+                </div>
             </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">شرح خرابی یا اقدام انجام شده:</label>
-            <textarea id="actionDesc" class="form-control" rows="2" placeholder="تعویض بلبرینگ، آب‌بندی، گیج فشار و..."></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary w-100 py-2"><i class="fa-solid fa-floppy-disk"></i> ثبت گزارش در سیستم</button>
-        </form>
-      </div>
+        </section>
+
+        <!-- SCANNER TAB -->
+        <section id="tab-scanner" class="hidden space-y-4">
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 text-center">
+                <h3 class="font-bold text-white mb-2">اسکن بارکد یا QR Code دستگاه</h3>
+                <p class="text-xs text-slate-400 mb-4">دوربین را جلوی برچسب دستگاه بگیرید تا شناسنامه و سوابق آن باز شود.</p>
+                <div id="reader" class="w-full max-w-sm mx-auto overflow-hidden rounded-lg border border-slate-600"></div>
+                <div id="scan-result" class="mt-4 p-3 bg-slate-900 rounded-lg text-sm text-emerald-400 hidden"></div>
+            </div>
+        </section>
+
+        <!-- ASSETS TAB -->
+        <section id="tab-assets" class="hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-white">لیست تجهیزات کارخانه</h3>
+                <button onclick="openNewAssetModal()" class="bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium">+ افزودن دستگاه</button>
+            </div>
+            <div id="assets-list" class="space-y-3">
+                <!-- Dynamic Assets -->
+            </div>
+        </section>
+
+        <!-- PM TAB -->
+        <section id="tab-pm" class="hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-white">برنامه تعمیرات پیشگیرانه (PM)</h3>
+                <button onclick="openNewPmModal()" class="bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium">+ ثبت رویداد سرویس</button>
+            </div>
+            <div id="pm-list" class="space-y-3">
+                <!-- Dynamic PM Log -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for New Asset -->
+    <div id="asset-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md p-6 rounded-2xl space-y-4">
+            <h3 class="text-lg font-bold text-white">افزودن دستگاه جدید</h3>
+            <input id="modal-code" type="text" placeholder="کد یا شماره بارکد (مثلا PUMP-01)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
+            <input id="modal-name" type="text" placeholder="نام دستگاه (مثلا پمپ تغذیه بویلر)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
+            <input id="modal-loc" type="text" placeholder="محل استقرار (مثلا سالن تولید - موتورخانه)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
+            <select id="modal-status" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
+                <option value="سالم و در حال کار">سالم و در حال کار</option>
+                <option value="نیازمند سرویس دوره‌ای">نیازمند سرویس دوره‌ای</option>
+                <option value="تعمیر اضطراری / خراب">تعمیر اضطراری / خراب</option>
+            </select>
+            <div class="flex gap-2 pt-2">
+                <button onclick="saveAsset()" class="flex-1 bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-medium">ذخیره دستگاه</button>
+                <button onclick="closeModals()" class="flex-1 bg-slate-700 text-slate-300 py-2.5 rounded-lg text-sm font-medium">انصراف</button>
+            </div>
+        </div>
     </div>
 
-    <h5 class="mb-3"><i class="fa-solid fa-list-check"></i> گزارش‌های ثبت شده (<span id="totalCount">0</span>)</h5>
-    <div id="recordsList"></div>
-  </div>
+    <!-- Script Logic -->
+    <script>
+        let assets = JSON.parse(localStorage.getItem('tasisat_assets')) || [
+            { code: 'M-01', name: 'کمپرسور هوای فشرده اصلی', loc: 'اتاق کمپرسور', status: 'سالم و در حال کار' },
+            { code: 'P-02', name: 'پمپ سانتریفیوژ انتقال شیر', loc: 'خط فرآیند', status: 'نیازمند سرویس دوره‌ای' }
+        ];
 
-  <script>
-    const form = document.getElementById('pmForm');
-    const recordsList = document.getElementById('recordsList');
-    const totalCount = document.getElementById('totalCount');
+        let pms = JSON.parse(localStorage.getItem('tasisat_pms')) || [
+            { code: 'M-01', task: 'تعویض فیلتر هوا و روغن', date: '1405/08/01', technician: 'مهندس مظفری' }
+        ];
 
-    let records = JSON.parse(localStorage.getItem('pm_records') || '[]');
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('bg-slate-700', 'text-slate-300');
+            });
+            event.currentTarget.classList.remove('bg-slate-700', 'text-slate-300');
+            event.currentTarget.classList.add('bg-emerald-600', 'text-white');
 
-    function render() {
-      recordsList.innerHTML = '';
-      totalCount.innerText = records.length;
-      if(records.length === 0) {
-        recordsList.innerHTML = '<div class="alert alert-secondary text-center">هنوز هیچ گزارشی ثبت نشده است.</div>';
-        return;
-      }
-      records.forEach((r, idx) => {
-        const item = document.createElement('div');
-        item.className = 'card mb-2 shadow-sm border-0';
-        item.innerHTML = `
-          <div class="card-body p-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <strong class="text-primary">${r.name}</strong>
-              <span class="badge ${r.priority.includes('فوری') ? 'badge-high' : 'badge-low'}">${r.priority}</span>
-            </div>
-            <small class="text-muted d-block mb-1"><i class="fa-regular fa-clock"></i> ${r.date} | ${r.section}</small>
-            <p class="mb-2 text-secondary" style="font-size: 0.9rem;">${r.desc}</p>
-            <button class="btn btn-outline-danger btn-sm py-0" onclick="deleteRecord(${idx})"><i class="fa-solid fa-trash"></i> حذف</button>
-          </div>
-        `;
-        recordsList.appendChild(item);
-      });
-    }
+            if(tabId === 'scanner') {
+                initScanner();
+            }
+        }
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const newRec = {
-        name: document.getElementById('eqName').value,
-        section: document.getElementById('eqSection').value,
-        priority: document.getElementById('priority').value,
-        desc: document.getElementById('actionDesc').value,
-        date: new Date().toLocaleDateString('fa-IR')
-      };
-      records.unshift(newRec);
-      localStorage.setItem('pm_records', JSON.stringify(records));
-      form.reset();
-      render();
-    });
+        function renderData() {
+            localStorage.setItem('tasisat_assets', JSON.stringify(assets));
+            localStorage.setItem('tasisat_pms', JSON.stringify(pms));
 
-    window.deleteRecord = function(index) {
-      if(confirm('آیا از حذف این گزارش اطمینان دارید؟')) {
-        records.splice(index, 1);
-        localStorage.setItem('pm_records', JSON.stringify(records));
-        render();
-      }
-    };
+            document.getElementById('stat-total').innerText = assets.length;
+            document.getElementById('stat-active').innerText = assets.filter(a => a.status.includes('سالم')).length;
+            document.getElementById('stat-warning').innerText = assets.filter(a => !a.status.includes('سالم')).length;
+            document.getElementById('stat-pm').innerText = pms.length;
 
-    render();
-  </script>
+            // Render Assets
+            let assetHtml = '';
+            assets.forEach(a => {
+                assetHtml += `
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-slate-700 px-2 py-0.5 rounded text-emerald-400 font-mono">${a.code}</span>
+                                <h4 class="font-bold text-white text-sm">${a.name}</h4>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">📍 ${a.loc} | وضعیت: <span class="text-amber-300">${a.status}</span></p>
+                        </div>
+                        <button onclick="deleteAsset('${a.code}')" class="text-red-400 text-xs px-2 py-1 bg-red-950/40 border border-red-900/50 rounded">حذف</button>
+                    </div>`;
+            });
+            document.getElementById('assets-list').innerHTML = assetHtml || '<p class="text-xs text-slate-500 text-center py-4">دستگاهی ثبت نشده است.</p>';
+
+            // Render PMs
+            let pmHtml = '';
+            pms.forEach(p => {
+                pmHtml += `
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs bg-sky-950 text-sky-300 px-2 py-0.5 rounded font-mono">کد دستگاه: ${p.code}</span>
+                            <span class="text-xs text-slate-400">📅 ${p.date}</span>
+                        </div>
+                        <p class="text-sm font-medium text-white mt-2">${p.task}</p>
+                        <p class="text-xs text-slate-400 mt-1">مسئول سرویس: ${p.technician}</p>
+                    </div>`;
+            });
+            document.getElementById('pm-list').innerHTML = pmHtml || '<p class="text-xs text-slate-500 text-center py-4">سرویسی ثبت نشده است.</p>';
+        }
+
+        function openNewAssetModal() {
+            document.getElementById('asset-modal').classList.remove('hidden');
+            document.getElementById('asset-modal').classList.add('flex');
+        }
+
+        function closeModals() {
+            document.getElementById('asset-modal').classList.add('hidden');
+            document.getElementById('asset-modal').classList.remove('flex');
+        }
+
+        function saveAsset() {
+            let code = document.getElementById('modal-code').value.trim();
+            let name = document.getElementById('modal-name').value.trim();
+            let loc = document.getElementById('modal-loc').value.trim();
+            let status = document.getElementById('modal-status').value;
+
+            if(!code || !name) {
+                alert('لطفاً کد و نام دستگاه را وارد کنید.');
+                return;
+            }
+
+            assets.push({ code, name, loc, status });
+            closeModals();
+            renderData();
+        }
+
+        function deleteAsset(code) {
+            if(confirm('آیا از حذف این دستگاه مطمئن هستید؟')) {
+                assets = assets.filter(a => a.code !== code);
+                renderData();
+            }
+        }
+
+        let html5QrCode;
+        function initScanner() {
+            if(!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+                html5QrCode.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    (decodedText, decodedResult) => {
+                        let found = assets.find(a => a.code === decodedText);
+                        let resDiv = document.getElementById('scan-result');
+                        resDiv.classList.remove('hidden');
+                        if(found) {
+                            resDiv.innerHTML = `✅ <b>دستگاه شناسایی شد:</b><br>نام: ${found.name}<br>کد: ${found.code}<br>موقعیت: ${found.loc}<br>وضعیت: ${found.status}`;
+                        } else {
+                            resDiv.innerHTML = `⚠️ بارکد اسکن شد (${decodedText}) اما دستگاهی با این کد در سیستم ثبت نشده است.`;
+                        }
+                    },
+                    (errorMessage) => {}
+                ).catch(err => {
+                    console.log(`خطا در دسترسی به دوربین: ${err}`);
+                });
+            }
+        }
+
+        renderData();
+    </script>
 </body>
 </html>

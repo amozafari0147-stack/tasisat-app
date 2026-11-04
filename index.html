@@ -45,9 +45,9 @@
                     <p class="text-xs text-gray-300">سامانه جامع مدیریت تأسیسات و نت (CMMS)</p>
                 </div>
             </div>
-            <div id="header-user-info" class="hidden flex items-center space-x-2 space-x-reverse text-sm">
+            <div id="header-user-info" class="hidden flex items-center space-x-3 space-x-reverse text-sm">
                 <span id="current-username" class="font-medium text-gray-200"></span>
-                <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition">خروج</button>
+                <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs transition">خروج</button>
             </div>
         </div>
     </header>
@@ -59,84 +59,79 @@
         <section id="auth-section" class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
             <div class="max-w-md mx-auto">
                 <div class="flex border-b mb-6">
-                    <button onclick="switchTab('login')" id="tab-login" class="flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800">ورود به سامانه</button>
-                    <button onclick="switchTab('register')" id="tab-register" class="flex-1 py-2 font-medium text-center text-gray-500">ثبت‌نام پرسنل</button>
+                    <button onclick="switchAuthTab('personnel')" id="tab-personnel" class="flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800">ورود / ثبت‌نام پرسنل</button>
+                    <button onclick="switchAuthTab('admin')" id="tab-admin" class="flex-1 py-2 font-medium text-center text-gray-500">ورود مدیریت</button>
                 </div>
 
-                <!-- فرم ورود -->
-                <div id="form-login" class="space-y-4">
-                    <!-- دکمه ویژه ورود مدیر بالای فرم قرار گرفت -->
-                    <div class="bg-amber-50 border border-amber-300 p-3 rounded-lg text-center">
-                        <p class="text-xs text-amber-800 mb-2 font-medium">جهت ورود مدیر کارخانه و تأیید پرسنل کلیک کنید:</p>
-                        <button onclick="fillAdminLogin()" class="w-full bg-amber-500 text-industrial-900 py-2 rounded-lg font-bold text-sm hover:bg-amber-400 transition shadow flex items-center justify-center space-x-2 space-x-reverse">
-                            <i class="fa-solid fa-user-shield"></i>
-                            <span>ورود سریع مدیر کل (رمز: 1368)</span>
-                        </button>
-                    </div>
-
-                    <div class="relative flex py-2 items-center">
-                        <div class="flex-grow border-t border-gray-200"></div>
-                        <span class="flex-shrink mx-4 text-gray-400 text-xs">یا ورود پرسنل</span>
-                        <div class="flex-grow border-t border-gray-200"></div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium mb-1">شماره موبایل</label>
-                        <input type="tel" id="login-mobile" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-industrial-800 focus:outline-none" placeholder="09123456789">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">رمز عبور</label>
-                        <input type="password" id="login-password" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-industrial-800 focus:outline-none" placeholder="رمز عبور">
-                    </div>
-                    <button onclick="handleLogin()" class="w-full bg-industrial-900 text-white py-2 rounded-lg font-bold hover:bg-industrial-800 transition">ورود</button>
-                    
-                    <div class="text-left">
-                        <button onclick="showForgotPassword()" class="text-xs text-blue-600 hover:underline">فراموشی رمز عبور؟</button>
+                <!-- فرم پرسنل (ثبت‌نام اولیه یا ورود) -->
+                <div id="auth-personnel-box" class="space-y-4">
+                    <div id="personnel-step-1">
+                        <p class="text-xs text-gray-600 mb-3">پرسنل گرامی، لطفاً مشخصات خود را جهت ثبت‌نام و درخواست دسترسی وارد نمایید:</p>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">نام و نام خانوادگی</label>
+                                <input type="text" id="p-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-industrial-800" placeholder="مثال: علی رضایی">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">سمت سازمانی</label>
+                                <input type="text" id="p-position" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-industrial-800" placeholder="مثال: اپراتور / تکنسین تأسیسات">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">شماره موبایل</label>
+                                <input type="tel" id="p-mobile" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-industrial-800" placeholder="09123456789">
+                            </div>
+                            <button onclick="registerPersonnel()" class="w-full bg-industrial-900 text-white py-2 rounded-lg font-bold hover:bg-industrial-800 transition">ارسال درخواست دسترسی</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- فرم ثبت‌نام -->
-                <div id="form-register" class="space-y-4 hidden">
+                <!-- فرم ورود مدیریت -->
+                <div id="auth-admin-box" class="space-y-4 hidden">
+                    <p class="text-xs text-gray-600 mb-3">مختص مدیر کارخانه جهت تأیید پرسنل و مدیریت سیستم:</p>
                     <div>
-                        <label class="block text-sm font-medium mb-1">نام و نام خانوادگی</label>
-                        <input type="text" id="reg-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none" placeholder="مثال: علی رضایی">
+                        <label class="block text-sm font-medium mb-1">رمز عبور مدیریت</label>
+                        <input type="password" id="admin-pass" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="رمز عبور (پیش‌فرض: 1368)">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">سمت سازمانی</label>
-                        <input type="text" id="reg-position" class="w-full px-3 py-2 border rounded-lg focus:outline-none" placeholder="مثال: اپراتور / تکنسین تأسیسات">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">شماره موبایل</label>
-                        <input type="tel" id="reg-mobile" class="w-full px-3 py-2 border rounded-lg focus:outline-none" placeholder="09123456789">
-                    </div>
-                    <button onclick="handleRegister()" class="w-full bg-amber-500 text-industrial-900 py-2 rounded-lg font-bold hover:bg-amber-400 transition">ثبت‌نام و ارسال کد تایید</button>
-                </div>
-
-                <!-- فرم تایید OTP -->
-                <div id="form-otp" class="space-y-4 hidden">
-                    <p class="text-sm text-gray-600 text-center">کد تایید ارسال شده را وارد کنید:</p>
-                    <div>
-                        <input type="text" id="otp-code" class="w-full text-center tracking-widest text-lg px-3 py-2 border rounded-lg focus:outline-none" placeholder="----">
-                    </div>
-                    <button onclick="verifyOtp()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition">تایید و ثبت نهایی</button>
+                    <button onclick="loginAdmin()" class="w-full bg-amber-500 text-industrial-900 py-2 rounded-lg font-bold hover:bg-amber-400 transition">ورود به پنل مدیریت</button>
                 </div>
 
             </div>
         </section>
 
-        <!-- پنل اصلی کاربری / مدیریت -->
+        <!-- داشبورد اصلی پس از ورود -->
         <section id="dashboard-section" class="hidden space-y-6">
-            <div id="admin-panel" class="hidden bg-white rounded-xl shadow-lg p-6 border border-amber-300">
-                <h3 class="text-lg font-bold text-amber-600 mb-4 border-b pb-2"><i class="fa-solid fa-user-shield ml-2"></i>مدیریت دسترسی پرسنل و تأیید ثبت‌نام‌ها</h3>
+            
+            <!-- پنل مدیریت (فقط برای مدیر) -->
+            <div id="manager-panel" class="hidden bg-white rounded-xl shadow-lg p-6 border border-amber-400 space-y-4">
+                <div class="flex items-center justify-between border-b pb-3">
+                    <h3 class="text-lg font-bold text-amber-600"><i class="fa-solid fa-user-shield ml-2"></i>مدیریت دسترسی پرسنل و تأیید ثبت‌نام‌ها</h3>
+                    <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">بخش مدیریت کل</span>
+                </div>
                 <div id="pending-users-list" class="space-y-2">
-                    <!-- لیست کاربران در انتظار تایید -->
+                    <!-- لیست پرسنل منتظر تایید -->
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                <h3 class="text-lg font-bold text-industrial-900 mb-2">خوش آمدید!</h3>
-                <p class="text-gray-600 text-sm">سامانه آماده بهره‌برداری و مدیریت تجهیزات کارخانه پارسا مهر آرین است.</p>
+            <!-- امکانات عمومی داشبورد (تجهیزات، نت، بارکد) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-xl shadow p-5 border border-gray-200">
+                    <h4 class="font-bold text-industrial-900 mb-2"><i class="fa-solid fa-barcode text-amber-500 ml-2"></i>اسکن و جستجوی تجهیزات</h4>
+                    <p class="text-xs text-gray-600 mb-3">اسکن بارکد دستگاه یا جستجوی دستی جهت مشاهده سوابق سرویس و PM.</p>
+                    <input type="text" placeholder="شماره یا نام دستگاه را وارد کنید..." class="w-full px-3 py-2 text-sm border rounded-lg mb-2 focus:outline-none">
+                    <button class="w-full bg-industrial-800 text-white py-1.5 rounded-lg text-sm font-medium hover:bg-industrial-700 transition">جستجوی تجهیز</button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow p-5 border border-gray-200">
+                    <h4 class="font-bold text-industrial-900 mb-2"><i class="fa-solid fa-calendar-check text-green-600 ml-2"></i>برنامه تعمیرات و نگهداری (PM)</h4>
+                    <p class="text-xs text-gray-600 mb-3">مشاهده سررسید سرویس دوره‌ای و هشدار هوشمند تجهیزات کارخانه.</p>
+                    <div class="bg-gray-50 p-3 rounded border text-xs text-gray-700">
+                        <p class="font-bold text-amber-600">سرویس‌های پیش‌رو:</p>
+                        <p>• پمپ سانتریفیوژ خط تولید (سررسید: امروز)</p>
+                        <p>• الکتروموتور آسیاب (سررسید: ۲ روز دیگر)</p>
+                    </div>
+                </div>
             </div>
+
         </section>
 
     </main>
@@ -148,74 +143,53 @@
 
     <!-- کدهای منطق جاوااسکریپت -->
     <script>
-        let users = JSON.parse(localStorage.getItem('parsammehr_users')) || [
-            { name: 'مدیر سیستم', position: 'مدیر کل', mobile: '09120000000', pass: '1368', role: 'admin', status: 'approved' }
-        ];
+        let users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
         let currentUser = null;
 
-        function switchTab(tab) {
-            document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
-            document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
-            document.getElementById('tab-login').className = tab === 'login' ? 'flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800' : 'flex-1 py-2 font-medium text-center text-gray-500';
-            document.getElementById('tab-register').className = tab === 'register' ? 'flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800' : 'flex-1 py-2 font-medium text-center text-gray-500';
+        function switchAuthTab(tab) {
+            const isPersonnel = tab === 'personnel';
+            document.getElementById('auth-personnel-box').classList.toggle('hidden', !isPersonnel);
+            document.getElementById('auth-admin-box').classList.toggle('hidden', isPersonnel);
+            document.getElementById('tab-personnel').className = isPersonnel ? 'flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800' : 'flex-1 py-2 font-medium text-center text-gray-500';
+            document.getElementById('tab-admin').className = !isPersonnel ? 'flex-1 py-2 font-bold text-center border-b-2 border-amber-500 text-amber-600' : 'flex-1 py-2 font-medium text-center text-gray-500';
         }
 
-        function fillAdminLogin() {
-            document.getElementById('login-mobile').value = '09120000000';
-            document.getElementById('login-password').value = '1368';
-            handleLogin();
-        }
-
-        function handleLogin() {
-            const mobile = document.getElementById('login-mobile').value.trim();
-            const pass = document.getElementById('login-password').value.trim();
-
-            if (mobile === '09120000000' && pass === '1368') {
-                currentUser = users.find(u => u.mobile === '09120000000') || { name: 'مدیر کل', role: 'admin', position: 'مدیر تأسیسات' };
-                initDashboard();
-                return;
-            }
-
-            const user = users.find(u => u.mobile === mobile && u.pass === pass);
-            if (!user) {
-                alert('اطلاعات ورود اشتباه است یا کاربر یافت نشد.');
-                return;
-            }
-            if (user.status !== 'approved') {
-                alert('حساب کاربری شما هنوز توسط مدیر تایید نشده است.');
-                return;
-            }
-
-            currentUser = user;
-            initDashboard();
-        }
-
-        function handleRegister() {
-            const name = document.getElementById('reg-name').value.trim();
-            const position = document.getElementById('reg-position').value.trim();
-            const mobile = document.getElementById('reg-mobile').value.trim();
+        function registerPersonnel() {
+            const name = document.getElementById('p-name').value.trim();
+            const position = document.getElementById('p-position').value.trim();
+            const mobile = document.getElementById('p-mobile').value.trim();
 
             if (!name || !position || !mobile) {
-                alert('لطفاً تمامی فیلدها را به دقت پر کنید.');
+                alert('لطفاً نام، سمت و شماره موبایل را کامل وارد کنید.');
                 return;
             }
 
-            alert('کد تایید (OTP) فرضی: 1234');
-            document.getElementById('form-register').classList.add('hidden');
-            document.getElementById('form-otp').classList.remove('hidden');
-            
-            window.tempRegUser = { name, position, mobile, status: 'pending', role: 'user', pass: '1234' };
+            // بررسی اینکه آیا قبلا ثبت‌نام کرده یا خیر
+            let existing = users.find(u => u.mobile === mobile);
+            if (existing) {
+                if (existing.status === 'approved') {
+                    alert('حساب شما قبلاً تایید شده است. جهت ورود منتظر تایید مدیر باشید یا با مدیر هماهنگ کنید.');
+                } else {
+                    alert('درخواست شما قبلاً ثبت شده و هم‌اکنون در انتظار تأیید مدیر است.');
+                }
+                return;
+            }
+
+            users.push({ name, position, mobile, status: 'pending', role: 'user' });
+            localStorage.setItem('parsammehr_users', JSON.stringify(users));
+            alert('درخواست ثبت‌نام شما با موفقیت ارسال شد.\nپس از تأیید مدیر کل می‌توانید از سامانه استفاده کنید.');
+            document.getElementById('p-name').value = '';
+            document.getElementById('p-position').value = '';
+            document.getElementById('p-mobile').value = '';
         }
 
-        function verifyOtp() {
-            const code = document.getElementById('otp-code').value.trim();
-            if (code === '1234' && window.tempRegUser) {
-                users.push(window.tempRegUser);
-                localStorage.setItem('parsammehr_users', JSON.stringify(users));
-                alert('ثبت‌نام شما با موفقیت انجام شد. پس از تایید مدیریت قادر به ورود خواهید بود.');
-                location.reload();
+        function loginAdmin() {
+            const pass = document.getElementById('admin-pass').value.trim();
+            if (pass === '1368') {
+                currentUser = { name: 'مدیر کل تأسیسات', position: 'مدیر', role: 'admin' };
+                initDashboard();
             } else {
-                alert('کد تایید اشتباه است.');
+                alert('رمز عبور مدیریت اشتباه است. (پیش‌فرض: 1368)');
             }
         }
 
@@ -226,7 +200,7 @@
             document.getElementById('current-username').innerText = currentUser.name + ' (' + currentUser.position + ')';
 
             if (currentUser.role === 'admin') {
-                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('manager-panel').classList.remove('hidden');
                 renderPendingUsers();
             }
         }
@@ -235,16 +209,16 @@
             const container = document.getElementById('pending-users-list');
             const pending = users.filter(u => u.status === 'pending');
             if (pending.length === 0) {
-                container.innerHTML = '<p class="text-sm text-gray-500">کاربر در انتظار تاییدی وجود ندارد.</p>';
+                container.innerHTML = '<p class="text-sm text-gray-500 py-2">هیچ درخواست تأیید جدیدی وجود ندارد.</p>';
                 return;
             }
-            container.innerHTML = pending.map((u, idx) => `
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded border">
+            container.innerHTML = pending.map((u) => `
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
                     <div>
-                        <p class="font-bold text-sm">${u.name} - <span class="text-xs text-gray-600">${u.position}</span></p>
+                        <p class="font-bold text-sm text-industrial-900">${u.name} - <span class="text-xs text-gray-600 font-normal">${u.position}</span></p>
                         <p class="text-xs text-gray-500">موبایل: ${u.mobile}</p>
                     </div>
-                    <button onclick="approveUser('${u.mobile}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">تایید دسترسی</button>
+                    <button onclick="approveUser('${u.mobile}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">تایید دسترسی</button>
                 </div>
             `).join('');
         }
@@ -255,20 +229,13 @@
                 user.status = 'approved';
                 localStorage.setItem('parsammehr_users', JSON.stringify(users));
                 renderPendingUsers();
-                alert('دسترسی کاربر تایید شد.');
+                alert('دسترسی کاربر با موفقیت تأیید شد.');
             }
         }
 
         function logout() {
             currentUser = null;
             location.reload();
-        }
-
-        function showForgotPassword() {
-            const mobile = prompt('شماره موبایل خود را وارد کنید تا کد جدید ارسال شود:');
-            if (mobile) {
-                alert('کد بازیابی موقت (رمز عبور جدید شما): 1368\nمی‌توانید با این رمز وارد شوید.');
-            }
         }
     </script>
 </body>

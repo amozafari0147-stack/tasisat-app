@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پارسا مهر آرین - سامانه جامع مدیریت تأسیسات و نت (CMMS)</title>
-    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.5"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
     <style>
@@ -228,7 +228,6 @@
                 document.getElementById('login-modal').classList.add('hidden');
                 document.getElementById('user-badge').innerText = `${currentUser.name} (${currentUser.role})`;
                 
-                // Check status in DB
                 let dbUser = usersDb.find(u => u.mobile === currentUser.mobile);
                 if(!isAdmin && (!dbUser || dbUser.status !== 'active')) {
                     alert('حساب کاربری شما هنوز توسط مدیر تایید نشده یا مسدود است.');
@@ -277,18 +276,16 @@
                 return;
             }
 
-            // Register in db as pending
             let existing = usersDb.find(u => u.mobile === pendingUserReg.mobile);
             if(existing) {
                 existing.name = pendingUserReg.name;
                 existing.role = pendingUserReg.role;
-                // keep status if already banned/active, otherwise pending
             } else {
                 usersDb.push({ 
                     name: pendingUserReg.name, 
                     role: pendingUserReg.role, 
                     mobile: pendingUserReg.mobile, 
-                    status: 'pending' // در انتظار تایید مدیر
+                    status: 'pending' 
                 });
             }
             localStorage.setItem('tasisat_users_db', JSON.stringify(usersDb));
@@ -306,7 +303,6 @@
                 localStorage.setItem('tasisat_is_admin', 'true');
                 localStorage.setItem('tasisat_current_user', JSON.stringify(currentUser));
                 
-                // Ensure admin is in usersDb as active
                 let adminEx = usersDb.find(u => u.mobile === '09000000000');
                 if(!adminEx) {
                     usersDb.push({ name: 'مهندس مظفری', role: 'مدیر کل', mobile: '09000000000', status: 'active' });
@@ -402,7 +398,6 @@
                 banner.classList.add('hidden');
             }
 
-            // Render Assets
             let assetHtml = '';
             assets.forEach(a => {
                 let isDue = a.nextDate && a.nextDate <= todayStr;
@@ -421,7 +416,6 @@
             });
             document.getElementById('assets-list').innerHTML = assetHtml || '<p class="text-xs text-slate-500 text-center py-4">دستگاهی ثبت نشده است.</p>';
 
-            // Render PMs
             let pmHtml = '';
             pms.forEach(p => {
                 pmHtml += `
@@ -475,7 +469,7 @@
             let listDiv = document.getElementById('users-list');
             let html = '';
             usersDb.forEach((u, index) => {
-                if(u.mobile === '09000000000') return; // Skip manager account in normal list
+                if(u.mobile === '09000000000') return;
                 let statusBadge = '';
                 let actionBtn = '';
 
@@ -484,4 +478,12 @@
                     actionBtn = `<button onclick="setUserStatus(${index}, 'active')" class="bg-emerald-950 text-emerald-300 hover:bg-emerald-900 px-3 py-1 rounded text-xs border border-emerald-900">تایید و اعطای دسترسی</button>`;
                 } else if(u.status === 'active') {
                     statusBadge = '<span class="text-[10px] text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded">فعال</span>';
-                    actionBtn = `<button onclick="setUserStatus(${index}, 'banned')" class="bg-red-950 text-red-300 hov
+                    actionBtn = `<button onclick="setUserStatus(${index}, 'banned')" class="bg-red-950 text-red-300 hover:bg-red-900 px-3 py-1 rounded text-xs border border-red-900">قطع دسترسی (اخراج)</button>`;
+                } else {
+                    statusBadge = '<span class="text-[10px] text-red-400 bg-red-950/50 px-2 py-0.5 rounded">مسدود شده</span>';
+                    actionBtn = `<button onclick="setUserStatus(${index}, 'active')" class="bg-emerald-950 text-emerald-300 hover:bg-emerald-900 px-3 py-1 rounded text-xs border border-emerald-900">تایید مجدد دسترسی</button>`;
+                }
+
+                html += `
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex justify-between items-center text-sm">
+                        <div>

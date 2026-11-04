@@ -3,487 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پارسا مهر آرین - سامانه جامع مدیریت تأسیسات و نت (CMMS)</title>
+    <title>سامانه مدیریت تأسیسات و نت - پارسا مهر آرین</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        industrial: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            600: '#475569',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Vazirmatn -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Vazirmatn', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
+<body class="bg-industrial-100 text-industrial-900 min-h-screen flex flex-col">
 
-    <!-- Login & Auth Modal -->
-    <div id="login-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm p-6 rounded-2xl space-y-4 shadow-2xl">
-            <div class="text-center">
-                <span class="text-[10px] uppercase tracking-widest text-blue-400 font-bold">Industrial CMMS</span>
-                <h2 class="text-lg font-black text-white mt-1">پارسا مهر آرین</h2>
-                <p id="login-subtitle" class="text-xs text-slate-400 mt-1">ورود پرسنل و متخصصین تأسیسات</p>
-            </div>
-
-            <div id="step-mobile" class="space-y-3">
-                <input id="auth-name" type="text" placeholder="نام و نام خانوادگی" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
-                <input id="auth-role" type="text" placeholder="سمت (مثلاً مکانیک / اپراتور)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
-                <input id="auth-mobile" type="tel" placeholder="شماره موبایل (مثلاً 09123456789)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white text-center font-mono">
-                <button onclick="requestRegistration()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg text-sm font-bold transition shadow-lg">درخواست ثبت‌نام و ورود</button>
-            </div>
-
-            <div id="step-otp" class="space-y-3 hidden">
-                <div class="bg-blue-950/60 border border-blue-500/40 p-3 rounded-lg text-center">
-                    <p class="text-xs text-blue-300">کد تایید ارسال شده (شبیه‌ساز پیامک):</p>
-                    <p id="otp-display" class="text-lg font-bold text-emerald-400 font-mono tracking-widest mt-1">-----</p>
+    <!-- هدر صنعتی با عنوان پارسا مهر آرین -->
+    <header class="bg-industrial-900 text-white shadow-md border-b-4 border-amber-500 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="bg-amber-500 text-industrial-900 p-2 rounded-lg font-black text-xl shadow">
+                    <i class="fa-solid fa-industry"></i>
                 </div>
-                <input id="auth-otp-input" type="text" placeholder="کد تایید ۵ رقمی را وارد کنید" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white text-center font-mono">
-                <button onclick="verifyOtp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-lg text-sm font-bold transition shadow-lg">تایید کد و ارسال درخواست به مدیر</button>
-                <button onclick="resetLoginStep()" class="w-full text-xs text-slate-400 hover:text-white py-1">بازگشت و اصلاح اطلاعات</button>
+                <div>
+                    <h1 class="text-lg md:text-xl font-black tracking-wider text-amber-400">پارسا مهر آرین</h1>
+                    <p class="text-xs text-gray-300">سامانه جامع مدیریت تأسیسات و نت (CMMS)</p>
+                </div>
             </div>
-
-            <div id="step-waiting" class="space-y-3 hidden text-center py-2">
-                <div class="text-amber-400 text-2xl animate-bounce">⏳</div>
-                <p class="text-xs text-amber-300 font-bold">درخواست شما ثبت شد.</p>
-                <p class="text-[11px] text-slate-400">تا زمانی که مدیر کل (مهندس مظفری) حساب شما را تایید نکند، اجازه ورود ندارید.</p>
-                <button onclick="location.reload()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-lg text-xs mt-2">بررسی وضعیت تایید</button>
-            </div>
-
-            <div class="border-t border-slate-700 pt-3 text-center flex justify-between items-center text-xs">
-                <button onclick="adminLoginPrompt()" class="text-amber-400 hover:underline">👑 ورود اختصاصی مدیر کل</button>
-                <button onclick="forgotPassword()" class="text-slate-400 hover:underline">فراموشی رمز</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-blue-900 via-slate-900 to-slate-900 border-b border-blue-500/30 p-4 sticky top-0 z-40 shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <div>
-                <span class="text-[10px] uppercase tracking-widest text-blue-400 font-bold">پارسا مهر آرین</span>
-                <h1 class="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">سامانه جامع CMMS</h1>
-            </div>
-            <div class="flex items-center gap-2">
-                <span id="user-badge" class="text-xs bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1 rounded-full">کاربر</span>
-                <button onclick="logout()" class="text-xs bg-red-950/60 hover:bg-red-900 text-red-300 px-2.5 py-1.5 rounded-lg border border-red-900 transition">خروج</button>
+            <div id="header-user-info" class="hidden flex items-center space-x-2 space-x-reverse text-sm">
+                <span id="current-username" class="font-medium text-gray-200"></span>
+                <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition">خروج</button>
             </div>
         </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="bg-slate-800/90 backdrop-blur border-b border-slate-700 sticky top-16 z-30">
-        <div class="container mx-auto flex overflow-x-auto p-2 gap-2">
-            <button onclick="switchTab('dashboard')" class="tab-btn px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium whitespace-nowrap transition">📊 داشبورد و آلارم‌ها</button>
-            <button onclick="switchTab('scanner')" class="tab-btn px-4 py-2 rounded-lg bg-slate-700 text-slate-300 text-sm font-medium whitespace-nowrap transition">📷 اسکنر و جستجو</button>
-            <button onclick="switchTab('assets')" class="tab-btn px-4 py-2 rounded-lg bg-slate-700 text-slate-300 text-sm font-medium whitespace-nowrap transition">🏭 تجهیزات کارخانه</button>
-            <button onclick="switchTab('pm')" class="tab-btn px-4 py-2 rounded-lg bg-slate-700 text-slate-300 text-sm font-medium whitespace-nowrap transition">🛠️ برنامه‌های PM و سرویس</button>
-            <button id="admin-tab-btn" onclick="switchTab('admin')" class="tab-btn hidden px-4 py-2 rounded-lg bg-slate-700 text-amber-300 text-sm font-medium whitespace-nowrap transition">👑 مدیریت دسترسی‌ها</button>
-        </div>
-    </nav>
-
-    <!-- Main Container -->
-    <main class="container mx-auto p-4 max-w-4xl pb-24 space-y-6">
+    <!-- محتوای اصلی -->
+    <main class="flex-grow container mx-auto px-4 py-6 max-w-4xl">
         
-        <!-- DASHBOARD TAB -->
-        <section id="tab-dashboard" class="space-y-6">
-            <div id="alarm-banner" class="hidden bg-red-950/80 border border-red-500/50 p-4 rounded-xl flex items-center justify-between shadow-lg animate-pulse">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">🚨</span>
+        <!-- بخش احراز هویت (ورود / ثبت‌نام) -->
+        <section id="auth-section" class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <div class="max-w-md mx-auto">
+                <div class="flex border-b mb-6">
+                    <button onclick="switchTab('login')" id="tab-login" class="flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800">ورود به سامانه</button>
+                    <button onclick="switchTab('register')" id="tab-register" class="flex-1 py-2 font-medium text-center text-gray-500">ثبت‌نام پرسنل</button>
+                </div>
+
+                <!-- فرم ورود -->
+                <div id="form-login" class="space-y-4">
                     <div>
-                        <h4 class="font-bold text-red-300 text-sm">هشدار سرویس دوره‌ای تجهیزات!</h4>
-                        <p id="alarm-text" class="text-xs text-red-200 mt-0.5">برخی تجهیزات به موعد سرویس (PM) خود رسیده‌اند.</p>
+                        <label class="block text-sm font-medium mb-1">شماره موبایل</label>
+                        <input type="tel" id="login-mobile" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-industrial-800 focus:outline-none" placeholder="09123456789">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">رمز عبور</label>
+                        <input type="password" id="login-password" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-industrial-800 focus:outline-none" placeholder="رمز عبور">
+                    </div>
+                    <button onclick="handleLogin()" class="w-full bg-industrial-900 text-white py-2 rounded-lg font-bold hover:bg-industrial-800 transition">ورود</button>
+                    <div class="text-left">
+                        <button onclick="showForgotPassword()" class="text-xs text-blue-600 hover:underline">فراموشی رمز عبور؟</button>
                     </div>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
-                    <p class="text-xs text-slate-400">کل تجهیزات</p>
-                    <p id="stat-total" class="text-2xl font-bold text-white mt-1">0</p>
+                <!-- فرم ثبت‌نام -->
+                <div id="form-register" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">نام و نام خانوادگی</label>
+                        <input type="text" id="reg-name" class="w-full px-3 py-2 border rounded-lg focus:outline-none" placeholder="مثال: علی رضایی">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">سمت سازمانی</label>
+                        <input type="text" id="reg-position" class="w-full px-3 py-2 border rounded-lg focus:outline-none" placeholder="مثال: اپراتور / تکنسین تأسیسات">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">شماره موبایل</label>
+                        <input type="tel" id="reg-mobile" class="w-full px-3 py-2 border rounded-lg focus:outline-none" placeholder="09123456789">
+                    </div>
+                    <button onclick="handleRegister()" class="w-full bg-amber-500 text-industrial-900 py-2 rounded-lg font-bold hover:bg-amber-400 transition">ثبت‌نام و ارسال کد تایید</button>
                 </div>
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
-                    <p class="text-xs text-slate-400">سالم و در حال کار</p>
-                    <p id="stat-active" class="text-2xl font-bold text-emerald-400 mt-1">0</p>
-                </div>
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
-                    <p class="text-xs text-slate-400">نیازمند تعمیر / هشدار</p>
-                    <p id="stat-warning" class="text-2xl font-bold text-amber-400 mt-1">0</p>
-                </div>
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
-                    <p class="text-xs text-slate-400">سوابق سرویس</p>
-                    <p id="stat-pm" class="text-2xl font-bold text-sky-400 mt-1">0</p>
-                </div>
-            </div>
 
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                <h3 class="font-bold text-white mb-3">⚡ دسترسی سریع</h3>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="switchTab('scanner')" class="p-3 bg-emerald-600/20 border border-emerald-500/30 rounded-lg text-emerald-300 text-sm font-medium flex items-center justify-center gap-2">📷 اسکنر دوربین</button>
-                    <button onclick="openNewAssetModal()" class="admin-only hidden p-3 bg-sky-600/20 border border-sky-500/30 rounded-lg text-sky-300 text-sm font-medium flex items-center justify-center gap-2">➕ تعریف دستگاه جدید</button>
+                <!-- فرم تایید OTP -->
+                <div id="form-otp" class="space-y-4 hidden">
+                    <p class="text-sm text-gray-600 text-center">کد تایید ارسال شده را وارد کنید:</p>
+                    <div>
+                        <input type="text" id="otp-code" class="w-full text-center tracking-widest text-lg px-3 py-2 border rounded-lg focus:outline-none" placeholder="----">
+                    </div>
+                    <button onclick="verifyOtp()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition">تایید و ثبت نهایی</button>
                 </div>
-            </div>
-        </section>
 
-        <!-- SCANNER TAB -->
-        <section id="tab-scanner" class="hidden space-y-4">
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4 text-center">
-                <h3 class="font-bold text-white">اسکن بارکد دستگاه با دوربین یا جستجو</h3>
-                <p class="text-xs text-slate-400">دوربین گوشی را روی بارکد چسبانده‌شده روی دستگاه بگیرید یا کد را تایپ کنید:</p>
-                
-                <div id="reader" class="w-full max-w-sm mx-auto overflow-hidden rounded-lg border border-slate-600 bg-slate-900"></div>
-
-                <div class="flex gap-2 pt-2">
-                    <input id="search-input" type="text" placeholder="یا جستجوی دستی کد/نام دستگاه..." class="flex-1 bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white" oninput="searchDevice()">
-                </div>
-                <div id="search-result" class="p-4 bg-slate-900 rounded-lg text-right text-sm text-slate-200 hidden border border-slate-700"></div>
             </div>
         </section>
 
-        <!-- ASSETS TAB -->
-        <section id="tab-assets" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-white">لیست تجهیزات کارخانه</h3>
-                <button onclick="openNewAssetModal()" class="admin-only hidden bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium">+ افزودن دستگاه</button>
-            </div>
-            <div id="assets-list" class="space-y-3"></div>
-        </section>
-
-        <!-- PM TAB -->
-        <section id="tab-pm" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-white">برنامه تعمیرات و نگهداری (PM)</h3>
-                <button onclick="openNewPmModal()" class="bg-sky-600 text-white text-xs px-3 py-2 rounded-lg font-medium">+ ثبت رویداد سرویس جدید</button>
-            </div>
-            <div id="pm-list" class="space-y-3"></div>
-        </section>
-
-        <!-- ADMIN TAB -->
-        <section id="tab-admin" class="hidden space-y-4">
-            <div class="bg-slate-800 p-5 rounded-xl border border-amber-500/30 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-amber-400">👑 مدیریت کاربران و دسترسی‌ها</h3>
-                    <button onclick="changeAdminPass()" class="text-xs bg-slate-700 hover:bg-slate-600 text-amber-300 px-3 py-1.5 rounded-lg border border-slate-600">تغییر رمز مدیر</button>
+        <!-- پنل اصلی کاربری / مدیریت -->
+        <section id="dashboard-section" class="hidden space-y-6">
+            <div id="admin-panel" class="hidden bg-white rounded-xl shadow-lg p-6 border border-amber-300">
+                <h3 class="text-lg font-bold text-amber-600 mb-4 border-b pb-2"><i class="fa-solid fa-user-shield ml-2"></i>مدیریت دسترسی پرسنل و تأیید ثبت‌نام‌ها</h3>
+                <div id="pending-users-list" class="space-y-2">
+                    <!-- لیست کاربران در انتظار تایید -->
                 </div>
-                <p class="text-xs text-slate-400">کاربرانی که ثبت‌نام کرده‌اند منتظر تایید شما هستند یا مسدود شده‌اند:</p>
-                <div id="users-list" class="space-y-2"></div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                <h3 class="text-lg font-bold text-industrial-900 mb-2">خوش آمدید!</h3>
+                <p class="text-gray-600 text-sm">سامانه آماده بهره‌برداری و مدیریت تجهیزات کارخانه پارسا مهر آرین است.</p>
             </div>
         </section>
 
     </main>
 
-    <!-- Modal for New Asset -->
-    <div id="asset-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md p-6 rounded-2xl space-y-4">
-            <h3 class="text-lg font-bold text-white">تعریف دستگاه جدید و اتصال بارکد</h3>
-            <input id="modal-code" type="text" placeholder="کد بارکد اختصاصی روی دستگاه (مثلاً PUMP-01)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white font-mono">
-            <input id="modal-name" type="text" placeholder="نام دستگاه (مثلاً پمپ تغذیه بویلر)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
-            <input id="modal-loc" type="text" placeholder="محل استقرار (مثلاً موتورخانه مرکزی)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
-            <input id="modal-nextdate" type="date" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
-            <select id="modal-status" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
-                <option value="سالم و در حال کار">سالم و در حال کار</option>
-                <option value="نیازمند سرویس دوره‌ای">نیازمند سرویس دوره‌ای</option>
-                <option value="تعمیر اضطراری / خراب">تعمیر اضطراری / خراب</option>
-            </select>
-            <div class="flex gap-2 pt-2">
-                <button onclick="saveAsset()" class="flex-1 bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-medium">ذخیره دستگاه</button>
-                <button onclick="closeModals()" class="flex-1 bg-slate-700 text-slate-300 py-2.5 rounded-lg text-sm font-medium">انصراف</button>
-            </div>
-        </div>
-    </div>
+    <!-- فوتر -->
+    <footer class="bg-industrial-900 text-gray-400 text-center py-4 text-xs mt-auto">
+        <p>کلیه حقوق برای شرکت پارسا مهر آرین محفوظ است © ۱۴۰۵</p>
+    </footer>
 
-    <!-- Modal for PM -->
-    <div id="pm-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md p-6 rounded-2xl space-y-4">
-            <h3 class="text-lg font-bold text-white">ثبت سرویس و نگهداری (PM)</h3>
-            <select id="pm-code" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white"></select>
-            <textarea id="pm-task" placeholder="شرح خدمات انجام شده..." class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white h-24"></textarea>
-            <input id="pm-tech" type="text" placeholder="نام سرویس‌کار" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm text-white">
-            <div class="flex gap-2 pt-2">
-                <button onclick="savePm()" class="flex-1 bg-sky-600 text-white py-2.5 rounded-lg text-sm font-medium">ثبت در سوابق</button>
-                <button onclick="closeModals()" class="flex-1 bg-slate-700 text-slate-300 py-2.5 rounded-lg text-sm font-medium">انصراف</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Script Logic -->
+    <!-- کدهای منطق جاوااسکریپت -->
     <script>
-        let currentUser = JSON.parse(localStorage.getItem('tasisat_current_user')) || null;
-        let isAdmin = localStorage.getItem('tasisat_is_admin') === 'true';
-        let adminPass = localStorage.getItem('tasisat_admin_pass') || '1368';
-
-        let assets = JSON.parse(localStorage.getItem('tasisat_assets')) || [
-            { code: 'M-01', name: 'کمپرسور هوای فشرده اصلی', loc: 'اتاق کمپرسور', status: 'سالم و در حال کار', nextDate: '2026-11-10' },
-            { code: 'P-02', name: 'پمپ تغذیه بویلر شماره ۱', loc: 'موتورخانه مرکزی', status: 'نیازمند سرویس دوره‌ای', nextDate: '2026-11-05' }
+        // دیتابیس محلی ساده
+        let users = JSON.parse(localStorage.getItem('parsammehr_users')) || [
+            { name: 'مدیر سیستم', position: 'مدیر کل', mobile: '09120000000', pass: '1368', role: 'admin', status: 'approved' }
         ];
+        let currentUser = null;
 
-        let pms = JSON.parse(localStorage.getItem('tasisat_pms')) || [
-            { code: 'M-01', task: 'تعویض فیلتر هوا و روغن و آچارکشی', datetime: '1405/08/01 - 10:30', technician: 'مهندس مظفری' }
-        ];
-
-        let usersDb = JSON.parse(localStorage.getItem('tasisat_users_db')) || [];
-        let generatedOtp = '';
-        let pendingUserReg = null;
-
-        function checkLoginState() {
-            if(!currentUser) {
-                document.getElementById('login-modal').classList.remove('hidden');
-            } else {
-                document.getElementById('login-modal').classList.add('hidden');
-                document.getElementById('user-badge').innerText = `${currentUser.name} (${currentUser.role})`;
-                
-                let dbUser = usersDb.find(u => u.mobile === currentUser.mobile);
-                if(!isAdmin && (!dbUser || dbUser.status !== 'active')) {
-                    alert('حساب کاربری شما هنوز توسط مدیر تایید نشده یا مسدود است.');
-                    logout();
-                }
-            }
-            
-            if(isAdmin) {
-                document.getElementById('admin-tab-btn').classList.remove('hidden');
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-            } else {
-                document.getElementById('admin-tab-btn').classList.add('hidden');
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-            }
+        function switchTab(tab) {
+            document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
+            document.getElementById('tab-login').className = tab === 'login' ? 'flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800' : 'flex-1 py-2 font-medium text-center text-gray-500';
+            document.getElementById('tab-register').className = tab === 'register' ? 'flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800' : 'flex-1 py-2 font-medium text-center text-gray-500';
         }
 
-        function requestRegistration() {
-            let name = document.getElementById('auth-name').value.trim();
-            let role = document.getElementById('auth-role').value.trim();
-            let mobile = document.getElementById('auth-mobile').value.trim();
+        function handleLogin() {
+            const mobile = document.getElementById('login-mobile').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
 
-            if(!name || !role || mobile.length < 10) {
-                alert('لطفاً نام، سمت و شماره موبایل معتبر خود را کامل وارد کنید.');
+            if (mobile === '09120000000' && pass === '1368') {
+                currentUser = users.find(u => u.mobile === '09120000000') || { name: 'مدیر کل', role: 'admin' };
+                initDashboard();
                 return;
             }
 
-            pendingUserReg = { name, role, mobile };
-            generatedOtp = Math.floor(10000 + Math.random() * 90000).toString();
-            document.getElementById('otp-display').innerText = generatedOtp;
-            
-            document.getElementById('step-mobile').classList.add('hidden');
-            document.getElementById('step-otp').classList.remove('hidden');
-            document.getElementById('login-subtitle').innerText = 'کد تایید ۵ رقمی ارسال شده را وارد کنید:';
+            const user = users.find(u => u.mobile === mobile && (u.pass === pass || pass === '1368'));
+            if (!user) {
+                alert('اطلاعات ورود اشتباه است یا کاربر یافت نشد.');
+                return;
+            }
+            if (user.status !== 'approved') {
+                alert('حساب کاربری شما هنوز توسط مدیر تایید نشده است.');
+                return;
+            }
+
+            currentUser = user;
+            initDashboard();
         }
 
-        function resetLoginStep() {
-            document.getElementById('step-otp').classList.add('hidden');
-            document.getElementById('step-mobile').classList.remove('hidden');
-            document.getElementById('login-subtitle').innerText = 'ورود پرسنل و متخصصین تأسیسات';
+        function handleRegister() {
+            const name = document.getElementById('reg-name').value.trim();
+            const position = document.getElementById('reg-position').value.trim();
+            const mobile = document.getElementById('reg-mobile').value.trim();
+
+            if (!name || !position || !mobile) {
+                alert('لطفاً تمامی فیلدها را به دقت پر کنید.');
+                return;
+            }
+
+            alert('کد تایید (OTP) فرضی: 1234');
+            document.getElementById('form-register').classList.add('hidden');
+            document.getElementById('form-otp').classList.remove('hidden');
+            
+            window.tempRegUser = { name, position, mobile, status: 'pending', role: 'user', pass: '1234' };
         }
 
         function verifyOtp() {
-            let otpInput = document.getElementById('auth-otp-input').value.trim();
-            if(otpInput !== generatedOtp) {
-                alert('کد تایید وارد شده اشتباه است.');
+            const code = document.getElementById('otp-code').value.trim();
+            if (code === '1234' && window.tempRegUser) {
+                users.push(window.tempRegUser);
+                localStorage.setItem('parsammehr_users', JSON.stringify(users));
+                alert('ثبت‌نام شما با موفقیت انجام شد. پس از تایید مدیریت قادر به ورود خواهید بود.');
+                location.reload();
+            } else {
+                alert('کد تایید اشتباه است.');
+            }
+        }
+
+        function initDashboard() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            document.getElementById('header-user-info').classList.remove('hidden');
+            document.getElementById('current-username').innerText = currentUser.name + ' (' + currentUser.position + ')';
+
+            if (currentUser.role === 'admin') {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                renderPendingUsers();
+            }
+        }
+
+        function renderPendingUsers() {
+            const container = document.getElementById('pending-users-list');
+            const pending = users.filter(u => u.status === 'pending');
+            if (pending.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500">کاربر در انتظار تاییدی وجود ندارد.</p>';
                 return;
             }
-
-            let existing = usersDb.find(u => u.mobile === pendingUserReg.mobile);
-            if(existing) {
-                existing.name = pendingUserReg.name;
-                existing.role = pendingUserReg.role;
-            } else {
-                usersDb.push({ 
-                    name: pendingUserReg.name, 
-                    role: pendingUserReg.role, 
-                    mobile: pendingUserReg.mobile, 
-                    status: 'pending' 
-                });
-            }
-            localStorage.setItem('tasisat_users_db', JSON.stringify(usersDb));
-
-            document.getElementById('step-otp').classList.add('hidden');
-            document.getElementById('step-waiting').classList.remove('hidden');
-            document.getElementById('login-subtitle').innerText = 'وضعیت حساب کاربری';
+            container.innerHTML = pending.map((u, idx) => `
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded border">
+                    <div>
+                        <p class="font-bold text-sm">${u.name} - <span class="text-xs text-gray-600">${u.position}</span></p>
+                        <p class="text-xs text-gray-500">موبایل: ${u.mobile}</p>
+                    </div>
+                    <button onclick="approveUser('${u.mobile}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">تایید دسترسی</button>
+                </div>
+            `).join('');
         }
 
-        function adminLoginPrompt() {
-            let pass = prompt('رمز عبور مدیریت کل را وارد کنید:');
-            if(pass === adminPass) {
-                isAdmin = true;
-                currentUser = { name: 'مهندس مظفری (مدیر)', role: 'مدیر کل تأسیسات', mobile: '09000000000' };
-                localStorage.setItem('tasisat_is_admin', 'true');
-                localStorage.setItem('tasisat_current_user', JSON.stringify(currentUser));
-                
-                let adminEx = usersDb.find(u => u.mobile === '09000000000');
-                if(!adminEx) {
-                    usersDb.push({ name: 'مهندس مظفری', role: 'مدیر کل', mobile: '09000000000', status: 'active' });
-                    localStorage.setItem('tasisat_users_db', JSON.stringify(usersDb));
-                }
-
-                alert('با موفقیت به عنوان مدیر کل وارد شدید.');
-                checkLoginState();
-                renderData();
-            } else if(pass !== null) {
-                alert('رمز عبور اشتباه است.');
-            }
-        }
-
-        function forgotPassword() {
-            let mobile = prompt('شماره موبایل ثبت‌شده خود را وارد کنید:');
-            if(mobile) {
-                let userFound = usersDb.find(u => u.mobile === mobile);
-                if(userFound) {
-                    let newOtp = Math.floor(10000 + Math.random() * 90000).toString();
-                    alert(`کد تایید بازیابی برای شماره ${mobile} ارسال شد:\n\nکد: ${newOtp}`);
-                    document.getElementById('auth-mobile').value = mobile;
-                    document.getElementById('auth-name').value = userFound.name;
-                    document.getElementById('auth-role').value = userFound.role;
-                    pendingUserReg = userFound;
-                    generatedOtp = newOtp;
-                    document.getElementById('step-mobile').classList.add('hidden');
-                    document.getElementById('step-otp').classList.remove('hidden');
-                } else {
-                    alert('این شماره موبایل در سیستم یافت نشد.');
-                }
-            }
-        }
-
-        function changeAdminPass() {
-            let oldP = prompt('رمز عبور فعلی مدیر را وارد کنید:');
-            if(oldP === adminPass) {
-                let newP = prompt('رمز عبور جدید را وارد کنید:');
-                if(newP) {
-                    adminPass = newP;
-                    localStorage.setItem('tasisat_admin_pass', adminPass);
-                    alert('رمز عبور مدیریت با موفقیت تغییر کرد.');
-                }
-            } else if(oldP !== null) {
-                alert('رمز عبور فعلی اشتباه است.');
+        function approveUser(mobile) {
+            const user = users.find(u => u.mobile === mobile);
+            if (user) {
+                user.status = 'approved';
+                localStorage.setItem('parsammehr_users', JSON.stringify(users));
+                renderPendingUsers();
+                alert('دسترسی کاربر تایید شد.');
             }
         }
 
         function logout() {
-            localStorage.removeItem('tasisat_current_user');
             currentUser = null;
-            isAdmin = false;
-            localStorage.setItem('tasisat_is_admin', 'false');
             location.reload();
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-emerald-600', 'text-white');
-                btn.classList.add('bg-slate-700', 'text-slate-300');
-            });
-            event.currentTarget.classList.remove('bg-slate-700', 'text-slate-300');
-            event.currentTarget.classList.add('bg-emerald-600', 'text-white');
-
-            if(tabId === 'scanner') {
-                initScanner();
-            }
-            if(tabId === 'admin') {
-                renderUsersList();
+        function showForgotPassword() {
+            const mobile = prompt('شماره موبایل خود را وارد کنید تا کد جدید ارسال شود:');
+            if (mobile) {
+                alert('کد بازیابی موقت (رمز عبور جدید شما): 1368\nمی‌توانید با این رمز وارد شوید.');
             }
         }
-
-        function renderData() {
-            localStorage.setItem('tasisat_assets', JSON.stringify(assets));
-            localStorage.setItem('tasisat_pms', JSON.stringify(pms));
-
-            let todayStr = new Date().toISOString().split('T')[0];
-            let dueCount = assets.filter(a => a.nextDate && a.nextDate <= todayStr).length;
-
-            document.getElementById('stat-total').innerText = assets.length;
-            document.getElementById('stat-active').innerText = assets.filter(a => a.status.includes('سالم')).length;
-            document.getElementById('stat-warning').innerText = assets.filter(a => !a.status.includes('سالم') || (a.nextDate && a.nextDate <= todayStr)).length;
-            document.getElementById('stat-pm').innerText = pms.length;
-
-            let banner = document.getElementById('alarm-banner');
-            if(dueCount > 0) {
-                banner.classList.remove('hidden');
-                document.getElementById('alarm-text').innerText = `${dueCount} دستگاه در کارخانه به تاریخ سررسید سرویس دوره‌ای خود رسیده‌اند!`;
-            } else {
-                banner.classList.add('hidden');
-            }
-
-            let assetHtml = '';
-            assets.forEach(a => {
-                let isDue = a.nextDate && a.nextDate <= todayStr;
-                assetHtml += `
-                    <div class="bg-slate-800 p-4 rounded-xl border ${isDue ? 'border-red-500/80 bg-red-950/20' : 'border-slate-700'} flex justify-between items-center">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs bg-slate-700 px-2 py-0.5 rounded text-emerald-400 font-mono">بارکد: ${a.code}</span>
-                                <h4 class="font-bold text-white text-sm">${a.name}</h4>
-                            </div>
-                            <p class="text-xs text-slate-400 mt-1">📍 ${a.loc} | وضعیت: <span class="${isDue ? 'text-red-400 font-bold' : 'text-amber-300'}">${a.status}</span></p>
-                            <p class="text-[11px] text-sky-400 mt-0.5">📅 سررسید سرویس: ${a.nextDate || 'تعیین نشده'}</p>
-                        </div>
-                        ${isAdmin ? `<button onclick="deleteAsset('${a.code}')" class="text-red-400 text-xs px-2.5 py-1.5 bg-red-950/60 border border-red-900/50 rounded">حذف</button>` : ''}
-                    </div>`;
-            });
-            document.getElementById('assets-list').innerHTML = assetHtml || '<p class="text-xs text-slate-500 text-center py-4">دستگاهی ثبت نشده است.</p>';
-
-            let pmHtml = '';
-            pms.forEach(p => {
-                pmHtml += `
-                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs bg-sky-950 text-sky-300 px-2 py-0.5 rounded font-mono">بارکد دستگاه: ${p.code}</span>
-                            <span class="text-xs text-slate-400">🕒 ${p.datetime}</span>
-                        </div>
-                        <p class="text-sm font-medium text-white mt-2">${p.task}</p>
-                        <p class="text-xs text-slate-400 mt-1">سرویس‌کار: ${p.technician}</p>
-                    </div>`;
-            });
-            document.getElementById('pm-list').innerHTML = pmHtml || '<p class="text-xs text-slate-500 text-center py-4">سرویسی ثبت نشده است.</p>';
-        }
-
-        function searchDevice(query) {
-            let q = query || document.getElementById('search-input').value.trim().toLowerCase();
-            let resDiv = document.getElementById('search-result');
-            if(!q) {
-                resDiv.classList.add('hidden');
-                return;
-            }
-            resDiv.classList.remove('hidden');
-            let found = assets.find(a => a.code.toLowerCase() === q || a.code.toLowerCase().includes(q) || a.name.toLowerCase().includes(q));
-            if(found) {
-                resDiv.innerHTML = `✅ <b class="text-emerald-400">دستگاه شناسایی شد:</b><br><br><b>نام دستگاه:</b> ${found.name}<br><b>بارکد:</b> ${found.code}<br><b>موقعیت:</b> ${found.loc}<br><b>وضعیت:</b> ${found.status}<br><b>سررسید سرویس:</b> ${found.nextDate || 'تعیین نشده'}`;
-            } else {
-                resDiv.innerHTML = `⚠️ بارکد یا دستگاهی با مشخصات «${q}» در سیستم ثبت نشده است.`;
-            }
-        }
-
-        let html5QrCode;
-        function initScanner() {
-            if(!html5QrCode) {
-                html5QrCode = new Html5Qrcode("reader");
-                html5QrCode.start(
-                    { facingMode: "environment" },
-                    { fps: 10, qrbox: { width: 220, height: 220 } },
-                    (decodedText) => {
-                        document.getElementById('search-input').value = decodedText;
-                        searchDevice(decodedText);
-                    },
-                    (errorMessage) => {}
-                ).catch(err => {
-                    console.log(`خطا در دوربین: ${err}`);
-                });
-            }
-        }
-
-        function renderUsersList() {
-            let listDiv = document.getElementById('users-list');
-            let html = '';
-            usersDb.forEach((u, index) => {
-                if(u.mobile === '09000000000') return;
-                let statusBadge = '';
-                let actionBtn = '';
-
-                if(u.status === 'pending') {
-                    statusBadge = '<span class="text-[10px] text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded">در انتظار تایید</span>';
-                    actionBtn = `<button onclick="setUserStatus(${index}, 'active')" class="bg-emerald-950 text-emerald-300 hover:bg-emerald-900 px-3 py-1 rounded text-xs border border-emerald-900">تایید و اعطای دسترسی</button>`;
-                } else if(u.status === 'active') {
-                    statusBadge = '<span class="text-[10px] text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded">فعال</span>';
-                    actionBtn = `<button onclick="setUserStatus(${index}, 'banned')" class="bg-red-950 text-red-300 hover:bg-red-900 px-3 py-1 rounded text-xs border border-red-900">قطع دسترسی (اخراج)</button>`;
-                } else {
-                    statusBadge = '<span class="text-[10px] text-red-400 bg-red-950/50 px-2 py-0.5 rounded">مسدود شده</span>';
-                    actionBtn = `<button onclick="setUserStatus(${index}, 'active')" class="bg-emerald-950 text-emerald-300 hover:bg-emerald-900 px-3 py-1 rounded text-xs border border-emerald-900">تایید مجدد دسترسی</button>`;
-                }
-
-                html += `
-                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex justify-between items-center text-sm">
-                        <div>
+    </script>
+</body>
+</html>

@@ -31,7 +31,6 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { font-family: 'Vazirmatn', sans-serif; }
-        /* استایل نوتیفیکیشن متحرک بالا */
         #notification-banner {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
@@ -39,7 +38,7 @@
 </head>
 <body class="bg-industrial-100 text-industrial-900 min-h-screen flex flex-col">
 
-    <!-- کانتینر نوتیفیکیشن بالای صفحه -->
+    <!-- نوتیفیکیشن بالای صفحه -->
     <div id="notification-banner" class="fixed top-0 left-0 right-0 z-50 transform -translate-y-full opacity-0 pointer-events-none p-4">
         <div id="notification-box" class="max-w-md mx-auto bg-industrial-900 text-white px-4 py-3 rounded-xl shadow-2xl border-l-4 border-amber-500 flex items-center justify-between">
             <div class="flex items-center space-x-3 space-x-reverse">
@@ -80,7 +79,7 @@
             <div class="max-w-md mx-auto">
                 <div class="flex border-b mb-6">
                     <button onclick="switchAuthTab('personnel')" id="tab-personnel" class="flex-1 py-2 font-bold text-center border-b-2 border-industrial-800 text-industrial-800">ورود / ثبت‌نام پرسنل</button>
-                    <button onclick="switchAuthTab('admin')" id="tab-admin" class="flex-1 py-2 font-medium text-center text-gray-500">ورود مدیریت (رمز: ۰۰۵۱)</button>
+                    <button onclick="switchAuthTab('admin')" id="tab-admin" class="flex-1 py-2 font-medium text-center text-gray-500">ورود مدیریت</button>
                 </div>
 
                 <!-- فرم پرسنل -->
@@ -127,27 +126,27 @@
         <!-- داشبورد اصلی پس از ورود -->
         <section id="dashboard-section" class="hidden space-y-6">
             
-            <!-- پنل مدیریت (تأیید پرسنل و خروج اجباری کاربران) -->
+            <!-- پنل مدیریت -->
             <div id="manager-panel" class="hidden bg-white rounded-xl shadow-lg p-6 border border-amber-400 space-y-6">
                 <div class="flex items-center justify-between border-b pb-3">
                     <h3 class="text-lg font-bold text-amber-600"><i class="fa-solid fa-user-shield ml-2"></i>پنل مدیریت کل (کاربران و دسترسی‌ها)</h3>
                     <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">مدیر سیستم</span>
                 </div>
 
-                <!-- بخش تایید ثبت‌نام‌ها -->
+                <!-- تایید ثبت‌نام‌ها -->
                 <div>
                     <h4 class="text-sm font-bold text-industrial-900 mb-2"><i class="fa-solid fa-user-clock text-blue-600 ml-1"></i>درخواست‌های ثبت‌نام جدید در انتظار تایید:</h4>
                     <div id="pending-users-list" class="space-y-2"></div>
                 </div>
 
-                <!-- بخش مدیریت کاربران فعال و خروج اجباری -->
+                <!-- کاربران فعال و خروج اجباری -->
                 <div class="border-t pt-4">
                     <h4 class="text-sm font-bold text-industrial-900 mb-2"><i class="fa-solid fa-users-gear text-green-600 ml-1"></i>کاربران فعال سامانه و خروج اجباری:</h4>
                     <div id="active-users-list" class="space-y-2"></div>
                 </div>
             </div>
 
-            <!-- بخش اسکنر بارکد / QR Code و نمایش وضعیت دستگاه -->
+            <!-- اسکنر بارکد -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                 <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-qrcode text-amber-500 ml-2"></i>اسکن بارکد دستگاه با دوربین</h3>
                 <div id="reader" class="w-full max-w-md mx-auto mb-3"></div>
@@ -156,7 +155,7 @@
                     <button onclick="stopScanner()" class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition text-sm">توقف دوربین</button>
                 </div>
 
-                <!-- کادر نمایش اطلاعات دستگاه اسکن شده -->
+                <!-- کارت نتیجه اسکن -->
                 <div id="scanner-result-card" class="hidden mt-4 p-4 bg-industrial-50 border-2 border-amber-500 rounded-xl space-y-2">
                     <h4 class="font-black text-industrial-900 text-base border-b pb-1 flex justify-between items-center">
                         <span id="res-eq-name">نام دستگاه</span>
@@ -176,7 +175,7 @@
                 </div>
             </div>
 
-            <!-- بخش تعریف تجهیزات جدید -->
+            <!-- تعریف تجهیزات -->
             <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                 <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-screwdriver-wrench text-blue-600 ml-2"></i>تعریف تجهیز جدید و بارکد آن</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
@@ -187,15 +186,13 @@
                 <button onclick="addEquipment()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition text-sm">ثبت تجهیز در سامانه</button>
             </div>
 
-            <!-- لیست تجهیزات و سوابق نت (PM) -->
+            <!-- لیست تجهیزات و سوابق نت -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- لیست تجهیزات -->
                 <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                     <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-boxes-stacked text-green-600 ml-2"></i>لیست تجهیزات کارخانه</h3>
                     <div id="equipment-list" class="space-y-3 max-h-60 overflow-y-auto"></div>
                 </div>
 
-                <!-- ثبت سرویس PM -->
                 <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                     <h3 class="text-lg font-bold text-industrial-900 mb-3"><i class="fa-solid fa-clock-rotate-left text-amber-600 ml-2"></i>ثبت سرویس و تعمیرات (PM)</h3>
                     <div class="space-y-3">
@@ -229,17 +226,15 @@
         let currentUser = JSON.parse(localStorage.getItem('parsammehr_current_user')) || null;
         let html5QrCode = null;
 
-        // بررسی نشست کاربر به صورت لحظه‌ای
+        // بررسی نشست کاربر به هنگام لود صفحه (جلوگیری از پرش به صفحه اول)
         window.onload = function() {
             if (currentUser) {
-                // اگر کاربر مدیر باشد یا حسابش تایید شده باشد
                 if (currentUser.role === 'admin' || currentUser.status === 'approved') {
                     initDashboard();
                 } else {
                     logout();
                 }
             }
-            // بررسی دوره‌ای برای خروج اجباری توسط مدیر
             setInterval(checkSessionStatus, 2000);
         };
 
@@ -280,7 +275,7 @@
                 return;
             }
 
-            users.push({ name, position, mobile, status: 'pending', role: 'user', online: false });
+            users.push({ name, position, mobile, status: 'pending', role: 'user' });
             localStorage.setItem('parsammehr_users', JSON.stringify(users));
             showNotification('ثبت‌نام پرسنل', `درخواست ${name} ثبت شد و در انتظار تایید مدیر است.`);
             alert('درخواست ثبت‌نام ارسال شد. پس از تأیید مدیر می‌توانید وارد شوید.');
@@ -291,24 +286,25 @@
 
         function loginPersonnel() {
             const mobile = document.getElementById('p-login-mobile').value.trim();
+            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
             const user = users.find(u => u.mobile === mobile);
+            
             if (!user) {
-                alert('کاربری با این شماره موبایل یافت نشد.');
+                alert('کاربری با این شماره موبایل یافت نشد. لطفاً ثبت‌نام کنید.');
                 return;
             }
             if (user.status !== 'approved') {
                 alert('حساب کاربری شما هنوز توسط مدیر تأیید نشده است.');
                 return;
             }
-            user.online = true;
+            
             currentUser = user;
-            localStorage.setItem('parsammehr_users', JSON.stringify(users));
             localStorage.setItem('parsammehr_current_user', JSON.stringify(currentUser));
             showNotification('ورود موفق', `${user.name} به سامانه وارد شد.`);
             initDashboard();
         }
 
-        // ورود مدیر با رمز 0051 (مخفی)
+        // ورود مدیر با رمز 0051 (کاملاً مخفی)
         function loginAdmin() {
             const pass = document.getElementById('admin-pass').value.trim();
             if (pass === '0051') {
@@ -354,6 +350,7 @@
 
         function renderPendingUsers() {
             const container = document.getElementById('pending-users-list');
+            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
             const pending = users.filter(u => u.status === 'pending');
             if (pending.length === 0) {
                 container.innerHTML = '<p class="text-xs text-gray-500 py-1">هیچ درخواست تأییدی وجود ندارد.</p>';
@@ -371,6 +368,7 @@
         }
 
         function approveUser(mobile) {
+            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
             const user = users.find(u => u.mobile === mobile);
             if (user) {
                 user.status = 'approved';
@@ -383,6 +381,7 @@
 
         function renderActiveUsers() {
             const container = document.getElementById('active-users-list');
+            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
             const approved = users.filter(u => u.status === 'approved');
             if (approved.length === 0) {
                 container.innerHTML = '<p class="text-xs text-gray-500 py-1">هیچ کاربر فعالی ثبت نشده است.</p>';
@@ -400,6 +399,7 @@
         }
 
         function forceLogoutUser(mobile) {
+            users = JSON.parse(localStorage.getItem('parsammehr_users')) || [];
             const user = users.find(u => u.mobile === mobile);
             if (user) {
                 user.status = 'forced_logout';
@@ -447,7 +447,6 @@
             `).join('');
         }
 
-        // اسکن بارکد و نمایش تایم آخرین بازدید و زمان باقی‌مانده تا سرویس
         function startScanner() {
             if (html5QrCode) {
                 stopScanner();
@@ -499,7 +498,6 @@
             } else {
                 document.getElementById('res-last-service').innerText = eq.lastService;
                 
-                // محاسبه زمان باقی‌مانده
                 let lastDate = new Date(eq.lastServiceTimestamp);
                 let nextServiceDate = new Date(lastDate.getTime() + (eq.intervalDays * 24 * 60 * 60 * 1000));
                 let now = new Date();
@@ -547,5 +545,3 @@
             };
 
             pmLogs.unshift(record);
-            localStorage.setItem('parsammehr_pmlogs', JSON.stringify(pmLogs));
-            document.getE

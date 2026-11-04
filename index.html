@@ -65,6 +65,21 @@
 
                 <!-- فرم ورود -->
                 <div id="form-login" class="space-y-4">
+                    <!-- دکمه ویژه ورود مدیر بالای فرم قرار گرفت -->
+                    <div class="bg-amber-50 border border-amber-300 p-3 rounded-lg text-center">
+                        <p class="text-xs text-amber-800 mb-2 font-medium">جهت ورود مدیر کارخانه و تأیید پرسنل کلیک کنید:</p>
+                        <button onclick="fillAdminLogin()" class="w-full bg-amber-500 text-industrial-900 py-2 rounded-lg font-bold text-sm hover:bg-amber-400 transition shadow flex items-center justify-center space-x-2 space-x-reverse">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span>ورود سریع مدیر کل (رمز: 1368)</span>
+                        </button>
+                    </div>
+
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-gray-200"></div>
+                        <span class="flex-shrink mx-4 text-gray-400 text-xs">یا ورود پرسنل</span>
+                        <div class="flex-grow border-t border-gray-200"></div>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium mb-1">شماره موبایل</label>
                         <input type="tel" id="login-mobile" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-industrial-800 focus:outline-none" placeholder="09123456789">
@@ -75,13 +90,6 @@
                     </div>
                     <button onclick="handleLogin()" class="w-full bg-industrial-900 text-white py-2 rounded-lg font-bold hover:bg-industrial-800 transition">ورود</button>
                     
-                    <div class="pt-2 border-t mt-4">
-                        <button onclick="fillAdminLogin()" class="w-full bg-amber-500 text-industrial-900 py-2 rounded-lg font-bold text-sm hover:bg-amber-400 transition flex items-center justify-center space-x-2 space-x-reverse">
-                            <i class="fa-solid fa-user-shield"></i>
-                            <span>ورود سریع مدیر سیستم (تایید پرسنل)</span>
-                        </button>
-                    </div>
-
                     <div class="text-left">
                         <button onclick="showForgotPassword()" class="text-xs text-blue-600 hover:underline">فراموشی رمز عبور؟</button>
                     </div>
@@ -155,6 +163,7 @@
         function fillAdminLogin() {
             document.getElementById('login-mobile').value = '09120000000';
             document.getElementById('login-password').value = '1368';
+            handleLogin();
         }
 
         function handleLogin() {
